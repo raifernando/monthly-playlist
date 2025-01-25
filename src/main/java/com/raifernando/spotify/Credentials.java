@@ -1,11 +1,11 @@
 package com.raifernando.spotify;
 
 import com.google.gson.JsonObject;
+import com.raifernando.util.PropertiesFile;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.Properties;
 
 public class Credentials {
     public static String client_id;
@@ -14,19 +14,22 @@ public class Credentials {
     private static LocalDateTime accessTokenTime;
 
     public static void loadKeys() throws IOException, InterruptedException {
-        Properties properties = new Properties();
-        FileInputStream file = new FileInputStream("config.properties");
-        properties.load(file);
+        client_id = PropertiesFile.getFromFile("CLIENT_ID");
+        client_secret = PropertiesFile.getFromFile("CLIENT_SECRET");
+        access_token = PropertiesFile.getFromFile("ACCESS_TOKEN");
 
-        client_id = properties.getProperty("CLIENT_ID");
-        client_secret = properties.getProperty("CLIENT_SECRET");
-        access_token = properties.getProperty("ACCESS_TOKEN");
         try {
-            accessTokenTime = LocalDateTime.parse(properties.getProperty("ACCESS_TOKEN_TIME"));
-            LocalDateTime anHourAgo = LocalDateTime.now().minusHours(1);
-            if (anHourAgo.isAfter(accessTokenTime)) {
-                System.out.println("Access token expired. Generating new one.");
-                accessToken();
+            String storedTime = PropertiesFile.getFromFile("ACCESS_TOKEN_TIME");
+            if (storedTime != null) {
+                accessTokenTime = LocalDateTime.parse(storedTime);
+                LocalDateTime anHourAgo = LocalDateTime.now().minusHours(1);
+                if (anHourAgo.isAfter(accessTokenTime)) {
+                    System.out.println("Access token expired. Generating new one.");
+                    accessToken();
+                }
+            }
+            else {
+                accessTokenTime = LocalDateTime.now();
             }
         } catch (DateTimeParseException e) {
             accessToken();
@@ -34,18 +37,8 @@ public class Credentials {
     }
 
     private static void saveAccessToken(String token) throws IOException {
-        Properties properties = new Properties();
-        FileInputStream file = new FileInputStream("config.properties");
-        properties.load(file);
-
-        properties.setProperty("ACCESS_TOKEN", token);
-        access_token = properties.getProperty("ACCESS_TOKEN");
-
-        accessTokenTime = LocalDateTime.now();
-        properties.setProperty("ACCESS_TOKEN_TIME", accessTokenTime.toString());
-
-        OutputStream output = new FileOutputStream("config.properties");
-        properties.store(output, null);
+        PropertiesFile.storeInFile("ACCESS_TOKEN", token);
+        PropertiesFile.storeInFile("ACCESS_TOKEN_TIME", accessTokenTime.toString());
     }
 
     public static void accessToken() throws IOException, InterruptedException {
@@ -57,7 +50,9 @@ public class Credentials {
         String httpBody = "grant_type=client_credentials&client_id=" + client_id + "&client_secret=" + client_secret;
 
         JsonObject jsonObject = Request.requestPost(url, headerName, headerValue, httpBody, JsonObject.class);
-        saveAccessToken(jsonObject.get("access_token").getAsString());
+        access_token = jsonObject.get("access_token").getAsString();
+        accessTokenTime = LocalDateTime.now();
+        saveAccessToken(access_token);
     }
 
     @Override

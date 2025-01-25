@@ -10,9 +10,13 @@ import java.net.http.HttpResponse;
 
 public class Request {
     public static <T> T requestGet(String url, Class<T> tClass) throws IOException, InterruptedException {
+        return requestGet(url, Credentials.access_token, tClass);
+    }
+
+    public static <T> T requestGet(String url, String accessToken, Class<T> tClass) throws IOException, InterruptedException {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .header("Authorization", "Bearer " + Credentials.access_token)
+                .header("Authorization", "Bearer " + accessToken)
                 .GET()
                 .build();
 
@@ -21,7 +25,8 @@ public class Request {
         int statusCode = response.statusCode();
 
         if (statusCode == 401) {
-            System.out.println("Token expired. Requesting new one.");
+            System.out.println("Access Token invalid. Requesting new one.");
+            System.out.println(response.body());
             Credentials.accessToken();
             return requestGet(url, tClass);
         }
@@ -41,6 +46,16 @@ public class Request {
 
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        Gson gson = new Gson();
+        return gson.fromJson(response.body(), tClass);
+    }
+
+    public static <T> T requestPost(HttpRequest httpRequest, Class<T> tClass) throws IOException, InterruptedException {
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("response:" + response.body());
 
         Gson gson = new Gson();
         return gson.fromJson(response.body(), tClass);

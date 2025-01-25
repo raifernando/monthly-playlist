@@ -80,8 +80,6 @@ public class User {
     public ArrayList<Track> getUserTopTracks(ArrayList<Track> tracks, int min, int playcountPerTrack) {
         ArrayList<Track> topTracks = new ArrayList<>();
 
-        System.out.println(tracks.getFirst().getName());
-
         tracks.sort(( (a, b) -> { return -1 * a.compareNameTo(b); } ));
 
         topTracks.add(tracks.getFirst());

@@ -1,26 +1,24 @@
 package com.raifernando;
 
-import com.raifernando.lastfm.User;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
+import com.raifernando.spotify.Credentials;
+import com.raifernando.spotify.Track;
+import com.raifernando.util.PropertiesFile;
 
 public class Main {
-    public static void main(String[] args) throws IOException, InterruptedException {
-        com.raifernando.lastfm.Credentials.loadKeys();
-        User user = new User("rrrarrsr");
+    public static void main(String[] args) throws Exception {
 
-        ZoneId zoneId = ZoneId.systemDefault();
+        PropertiesFile.setFileName("config.properties");
+//
+        Credentials.loadKeys();
 
-        LocalDate startDate = LocalDate.of(2021, 12, 1);
-        LocalDate endDate = LocalDate.of(2026, 1, 1);
+        Track.getTrack("6rdkCkjk6D12xRpdMXy0I2");
+//
+//        OAuth.getAccessCode();
+//
+//        SpotifyUser user = SpotifyUser.getCurrentUser();
+//        System.out.println(user.getId());
 
-        long startUnix = startDate.atStartOfDay(zoneId).toEpochSecond();
-        long endUnix = endDate.atStartOfDay(zoneId).toEpochSecond();
+//        System.out.println(OAuth.spotifyLoginUrl());
 
-        ArrayList<com.raifernando.lastfm.Track> tracks = user.getRecentTracks(String.valueOf(startUnix), String.valueOf(endUnix));
-
-        user.getUserTopTracks(tracks, 1,1);
     }
 }
