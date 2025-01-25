@@ -20,8 +20,29 @@ public class OAuth {
     public static LocalDateTime authCodeTime;
 
     public static String accessToken;
+    public static LocalDateTime accessTokenTime;
 
     public static void getAccessCode() throws Exception {
+        // TODO: create custom exceptions for different errors while requesting
+        // TODO: refresh token
+
+//        try {
+//            String storedTime = PropertiesFile.getFromFile("USER_ACCESS_CODE_TIME");
+//            if (storedTime != null) {
+//                accessTokenTime = LocalDateTime.parse(storedTime);
+//                LocalDateTime anHourAgo = LocalDateTime.now().minusHours(1);
+//                if (!anHourAgo.isAfter(accessTokenTime)) {
+//                    accessToken = PropertiesFile.getFromFile("AUTHORIZATION_CODE");
+//                    return;
+//                }
+//                System.out.println("User's access token expired. Authentication required.");
+//            }
+//            else {
+//                authCodeTime = null;
+//                accessTokenTime = LocalDateTime.now();
+//            }
+//        } catch (DateTimeParseException _) {}
+
         OAuth.requestAuthorizationCode();
 
         Map<String, String> body = Map.of(
@@ -39,25 +60,31 @@ public class OAuth {
                 .build();
 
         JsonObject json = Request.requestPost(httpRequest, JsonObject.class);
-        accessToken = json.get("access_token").getAsString();
+
+        try {
+            accessToken = json.get("access_token").getAsString();
+            saveUserAccessCode();
+        } catch (NullPointerException e) {
+            System.out.println("Error getting users' access code");
+        }
     }
 
     public static void requestAuthorizationCode() throws Exception {
-        try {
-            String storedTime = PropertiesFile.getFromFile("AUTHORIZATION_CODE_TIME");
-            if (storedTime != null) {
-                authCodeTime = LocalDateTime.parse(storedTime);
-                LocalDateTime anHourAgo = LocalDateTime.now().minusHours(1);
-                if (!anHourAgo.isAfter(authCodeTime)) {
-                    authCode = PropertiesFile.getFromFile("AUTHORIZATION_CODE");
-                    return;
-                }
-                System.out.println("Authorization code expired.");
-            }
-            else {
-                authCodeTime = LocalDateTime.now();
-            }
-        } catch (DateTimeParseException _) {}
+//        try {
+//            String storedTime = PropertiesFile.getFromFile("AUTHORIZATION_CODE_TIME");
+//            if (storedTime != null && authCodeTime != null) {
+//                authCodeTime = LocalDateTime.parse(storedTime);
+//                LocalDateTime anHourAgo = LocalDateTime.now().minusHours(1);
+//                if (!anHourAgo.isAfter(authCodeTime)) {
+//                    authCode = PropertiesFile.getFromFile("AUTHORIZATION_CODE");
+//                    return;
+//                }
+//                System.out.println("Authorization code expired.");
+//            }
+//            else {
+//                authCodeTime = LocalDateTime.now();
+//            }
+//        } catch (DateTimeParseException _) {}
 
         AuthCodeReceiver.startServer();
 
@@ -68,6 +95,11 @@ public class OAuth {
         AuthCodeReceiver.stopServer();
 
         saveAuthorizationCode();
+    }
+
+    private static void saveUserAccessCode() throws IOException {
+        PropertiesFile.storeInFile("USER_ACCESS_CODE", accessToken);
+        PropertiesFile.storeInFile("USER_ACCESS_CODE_TIME", accessTokenTime.toString());
     }
 
     private static void saveAuthorizationCode() throws IOException {

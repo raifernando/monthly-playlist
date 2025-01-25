@@ -1,8 +1,10 @@
 package com.raifernando;
 
-import com.raifernando.spotify.Credentials;
-import com.raifernando.spotify.Track;
+import com.raifernando.spotify.*;
 import com.raifernando.util.PropertiesFile;
+import com.raifernando.util.QueryGenerator;
+
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -11,14 +13,27 @@ public class Main {
 //
         Credentials.loadKeys();
 
-        Track.getTrack("6rdkCkjk6D12xRpdMXy0I2");
-//
-//        OAuth.getAccessCode();
+//        Track.getTrack("6rdkCkjk6D12xRpdMXy0I2");
+
+        OAuth.getAccessCode();
 //
 //        SpotifyUser user = SpotifyUser.getCurrentUser();
-//        System.out.println(user.getId());
+//        SpotifyPlaylist playlist = SpotifyPlaylist.createPlaylist(user);
+//
+//        System.out.println(playlist.getId());
 
-//        System.out.println(OAuth.spotifyLoginUrl());
+        Track track = Track.searchForTrack("dealer", "lana del rey");
+        System.out.println(track.toString());
+
+        SpotifyPlaylist playlist = new SpotifyPlaylist();
+        playlist.setId("4gpClYRjmw4BSM3dRG2m1S");
+
+        playlist.addTrack(track);
+        playlist.addTrack(track);
+        playlist.addTrack(track);
+
+
+
 
     }
 }

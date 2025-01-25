@@ -60,4 +60,11 @@ public class Request {
         Gson gson = new Gson();
         return gson.fromJson(response.body(), tClass);
     }
+
+    // Returns the response
+    public static HttpResponse<String> requestPost(HttpRequest httpRequest) throws IOException, InterruptedException {
+        HttpClient httpClient = HttpClient.newHttpClient();
+
+        return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+    }
 }
