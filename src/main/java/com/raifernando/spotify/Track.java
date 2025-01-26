@@ -40,7 +40,13 @@ public class Track {
 
         JsonObject jsonObject = Request.requestGet(url + query, JsonObject.class).getAsJsonObject("tracks");
         JsonArray jsonArray = jsonObject.getAsJsonArray("items");
-        return gson.fromJson(jsonArray.get(0).getAsJsonObject(), Track.class);
+
+        try {
+            return gson.fromJson(jsonArray.get(0).getAsJsonObject(), Track.class);
+        } catch (IndexOutOfBoundsException _) {
+            System.out.printf("Track %s not found.", trackName);
+            return null;
+        }
     }
 
     public ArrayList<Artist> getArtists() {

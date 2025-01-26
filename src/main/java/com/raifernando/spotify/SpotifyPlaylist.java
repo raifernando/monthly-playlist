@@ -1,13 +1,20 @@
 package com.raifernando.spotify;
 
+import com.raifernando.lastfm.LastfmTrack;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
+import java.util.ArrayList;
 
 public class SpotifyPlaylist {
     private String id;
     private String name;
     private SpotifyUser owner;
+
+    public SpotifyPlaylist(String id) {
+        this.id = id;
+    }
 
     public static SpotifyPlaylist createPlaylist(SpotifyUser user) throws IOException, InterruptedException {
         if (OAuth.accessToken == null || user.getId() == null) {
@@ -29,6 +36,9 @@ public class SpotifyPlaylist {
     }
 
     public void addTrack(Track track) throws IOException, InterruptedException {
+        if (track == null)
+            return;
+
         System.out.println("Adding " + track.getName() + " - " + track.getArtistName());
 
         String url = "https://api.spotify.com/v1/playlists/" + id + "/tracks";
@@ -45,6 +55,13 @@ public class SpotifyPlaylist {
         if (response.statusCode() != 201) {
             System.out.println("------ Error adding track [" + track.getName() + "]");
             System.out.println(response.body());
+        }
+    }
+
+    public void addTracks(SpotifyPlaylist playlist, ArrayList<LastfmTrack> tracks) throws IOException, InterruptedException {
+        for (LastfmTrack track : tracks) {
+            Track spotifyTrack = Track.searchForTrack(track.getName(), track.getArtist().getName());
+            playlist.addTrack(spotifyTrack);
         }
     }
 

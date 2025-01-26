@@ -31,7 +31,7 @@ public class Request {
             return requestGet(url, tClass);
         }
 
-        System.out.println(response.body());
+//        System.out.println(response.body());
         Gson gson = new Gson();
         return gson.fromJson(response.body(), tClass);
     }

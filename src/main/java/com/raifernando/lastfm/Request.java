@@ -12,7 +12,7 @@ import java.net.http.HttpResponse;
 public class Request {
     public static JsonObject requestGet(String url) throws IOException, InterruptedException {
         HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(url + "&api_key=" + Credentials.api_key +"&format=json"))
+                .uri(URI.create(url + "&api_key=" + LastfmCredentials.api_key +"&format=json"))
                 .GET()
                 .build();
 

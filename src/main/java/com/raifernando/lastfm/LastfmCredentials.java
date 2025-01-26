@@ -4,7 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class Credentials {
+public class LastfmCredentials {
     public static String api_key;
 
     public static void loadKeys() throws IOException {
