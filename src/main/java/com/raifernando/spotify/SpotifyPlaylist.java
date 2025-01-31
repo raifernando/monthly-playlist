@@ -58,6 +58,40 @@ public class SpotifyPlaylist {
         }
     }
 
+    public void addMultipleTracks(SpotifyPlaylist playlist, ArrayList<LastfmTrack> tracks) throws IOException, InterruptedException {
+        System.out.println("Adding tracks to playlist");
+        ArrayList<String> listOfUris = new ArrayList<>();
+
+        for (LastfmTrack track : tracks) {
+            Track spotifyTrack = Track.searchForTrack(track.getName(), track.getArtist().getName());
+            listOfUris.add(spotifyTrack.getUri());
+        }
+
+        String url = "https://api.spotify.com/v1/playlists/" + id + "/tracks";
+        StringBuilder jsonBody = new StringBuilder("{\"uris\": [");
+
+        for (String uri : listOfUris) {
+            jsonBody.append("\"").append(uri).append("\",");
+        }
+        jsonBody.deleteCharAt(jsonBody.length() - 1); // remove last ','
+        jsonBody.append("]}");
+
+        System.out.println(jsonBody);
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody.toString()))
+                .uri(URI.create(url))
+                .header("content-type", "application/json")
+                .header("Authorization", "Bearer " + OAuth.accessToken)
+                .build();
+
+        var response = Request.requestPost(httpRequest);
+        if (response.statusCode() != 201) {
+            System.out.println("------ Error adding tracks");
+            System.out.println(response.body());
+        }
+    }
+
     public void addTracks(SpotifyPlaylist playlist, ArrayList<LastfmTrack> tracks) throws IOException, InterruptedException {
         for (LastfmTrack track : tracks) {
             Track spotifyTrack = Track.searchForTrack(track.getName(), track.getArtist().getName());
