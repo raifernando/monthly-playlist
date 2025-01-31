@@ -4,16 +4,20 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.raifernando.util.DateRange;
+import com.raifernando.util.PropertiesFile;
 
-import javax.sound.midi.SysexMessage;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 
 import static java.lang.Integer.compare;
 
 public class LastfmUser {
     private String user;
+
+    public LastfmUser() {}
 
     public LastfmUser(String user) {
         this.user = user;
@@ -25,6 +29,16 @@ public class LastfmUser {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public void setUser(String [] args) {
+        if (args.length == 3)
+            user = args[0];
+        else
+            user = PropertiesFile.getFromFile("LASTFM_USER");
+
+        if (user == null || user.isEmpty())
+            throw new InvalidParameterException();
     }
 
     public ArrayList<LastfmTrack> getTopTracks() throws IOException, InterruptedException {
@@ -45,11 +59,11 @@ public class LastfmUser {
         return gson.fromJson(tracksJson, arrayType);
     }
 
-    public ArrayList<LastfmTrack> getRecentTracks(String startDate, String endDate) throws IOException, InterruptedException {
-        // TODO: save response in json file
+    public ArrayList<LastfmTrack> getRecentTracks(DateRange dateRange) throws IOException, InterruptedException {
+        System.out.print("Requesting Lastfm data. Page: ");
 
         String url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="
-                + user + "&from=" + startDate + "&to=" + endDate +"&limit=200";
+                + user + "&from=" + dateRange.getStartDate() + "&to=" + dateRange.getEndDate() +"&limit=200";
 
         Gson gson = new Gson();
 
@@ -58,8 +72,9 @@ public class LastfmUser {
         Type arrayType = new TypeToken<ArrayList<LastfmTrack>>(){}.getType();
 
         int currentPage = 1;
-
         do {
+            System.out.printf("%d ", currentPage);
+
             JsonObject jsonObject = Request.requestGet(url + "&page=" + currentPage)
                     .getAsJsonObject("recenttracks");
 
@@ -74,6 +89,8 @@ public class LastfmUser {
 
             tracks.addAll(newTracks);
         } while (currentPage++ < response.getTotalPages());
+
+        System.out.println();
 
         return tracks;
     }
@@ -101,7 +118,7 @@ public class LastfmUser {
         }
 
         for (var track: topTracks) {
-            System.out.println(track.getPlaycount() + " " + track.getName());
+            System.out.println(track.getPlaycount() + " " + track.getName() + " " + track.getDate());
         }
 
         return topTracks;

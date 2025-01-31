@@ -1,10 +1,14 @@
 package com.raifernando.lastfm;
 
 public class LastfmTrack {
-    private String mbid;
     private String name;
     private LastfmArtist artist;
-    private int playcount;
+    private transient int playcount;
+
+    private Date date;
+    private static class Date {
+        private String uts;
+    }
 
     public String getName() {
         return name;
@@ -18,20 +22,16 @@ public class LastfmTrack {
         return playcount;
     }
 
-    public int compareMbidTo(LastfmTrack b) {
-        return mbid.compareTo(b.mbid);
-    }
-
     public int compareNameTo(LastfmTrack b) {
         return name.compareTo(b.name);
     }
 
-    public String getMbid() {
-        return mbid;
-    }
-
     public void increasePlaycount(int x) {
         playcount += x;
+    }
+
+    public String getDate() {
+        return date.uts;
     }
 
     @Override
