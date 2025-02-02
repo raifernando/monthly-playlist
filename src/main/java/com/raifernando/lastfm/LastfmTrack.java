@@ -3,6 +3,7 @@ package com.raifernando.lastfm;
 public class LastfmTrack {
     private String name;
     private LastfmArtist artist;
+    private LastfmAlbum album;
     private transient int playcount;
 
     private Date date;
@@ -32,6 +33,10 @@ public class LastfmTrack {
 
     public String getDate() {
         return date.uts;
+    }
+
+    public LastfmAlbum getAlbum() {
+        return album;
     }
 
     @Override

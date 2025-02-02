@@ -63,7 +63,7 @@ public class SpotifyPlaylist {
         ArrayList<String> listOfUris = new ArrayList<>();
 
         for (LastfmTrack track : tracks) {
-            Track spotifyTrack = Track.searchForTrack(track.getName(), track.getArtist().getName());
+            Track spotifyTrack = Track.searchForTrack(track.getName(), track.getArtist().getName(), track.getAlbum().getName());
             listOfUris.add(spotifyTrack.getUri());
         }
 
@@ -94,9 +94,15 @@ public class SpotifyPlaylist {
 
     public void addTracks(SpotifyPlaylist playlist, ArrayList<LastfmTrack> tracks) throws IOException, InterruptedException {
         for (LastfmTrack track : tracks) {
-            Track spotifyTrack = Track.searchForTrack(track.getName(), track.getArtist().getName());
+            Track spotifyTrack = Track.searchForTrack(track.getName(), track.getArtist().getName(), track.getAlbum().getName());
             playlist.addTrack(spotifyTrack);
         }
+
+        System.out.printf("Tracks added in: %s\n", playlist.getURL());
+    }
+
+    public String getURL() {
+        return "https://open.spotify.com/playlist/" + id;
     }
 
     public String getId() {
