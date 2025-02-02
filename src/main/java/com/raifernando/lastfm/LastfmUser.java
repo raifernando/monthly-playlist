@@ -95,6 +95,11 @@ public class LastfmUser {
         return tracks;
     }
 
+    /**
+     * @param min: minimum quantity of tracks
+     * @param max: maximum quantity of tracks
+     * @param playcountPerTrack: add all tracks with this playcount, overriding the max count; set to 0 to respect the max parameter
+     */
     public ArrayList<LastfmTrack> getUserTopTracks(ArrayList<LastfmTrack> tracks, int min, int max, int playcountPerTrack) {
         ArrayList<LastfmTrack> topTracks = new ArrayList<>();
 
@@ -113,13 +118,17 @@ public class LastfmUser {
 
         topTracks.sort(( (a, b) -> { return -1 * compare(a.getPlaycount(), b.getPlaycount()); } ));
 
-        if (max > 0  && topTracks.size() > max) {
-            topTracks.subList(max, topTracks.size()).clear();
+        int arraySize = min;
+        if (playcountPerTrack != 0) {
+            for (; arraySize < topTracks.size(); arraySize++) {
+                if (playcountPerTrack > topTracks.get(arraySize - 1).getPlaycount())
+                    break;
+            }
         }
+        else
+            arraySize = max;
 
-        for (var track: topTracks) {
-            System.out.println(track.getPlaycount() + " " + track.getName() + " " + track.getDate());
-        }
+        topTracks.subList(Integer.min(arraySize, topTracks.size()), topTracks.size()).clear();
 
         return topTracks;
     }
