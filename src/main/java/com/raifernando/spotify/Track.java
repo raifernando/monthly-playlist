@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.raifernando.util.QueryGenerator;
+import com.raifernando.util.Request;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -20,15 +20,20 @@ public class Track {
     private int track_number;
     private String uri;
 
-    public static Track getTrack(String trackId) throws IOException, InterruptedException {
+    public static Track getTrack(String trackId) {
         String requestUrl = "https://api.spotify.com/v1/tracks/" + trackId;
 
-        Track track = Request.requestGet(requestUrl, Track.class);
+        Track track = Request.requestGet(
+                requestUrl,
+                new String[] {"Authorization", "Bearer " + Credentials.access_token},
+                Track.class
+        );
+
         System.out.println(track.toString());
         return track;
     }
 
-    public static Track searchForTrack(String trackName, String artistName, String albumName) throws IOException, InterruptedException {
+    public static Track searchForTrack(String trackName, String artistName, String albumName) {
         String url = "https://api.spotify.com/v1/search?q=";
 
         Map<String, String> map = Map.of(
@@ -42,7 +47,12 @@ public class Track {
         Gson gson = new Gson();
 
         try {
-            JsonObject jsonObject = Request.requestGet(url + query, JsonObject.class).getAsJsonObject("tracks");
+            JsonObject jsonObject = Request.requestGet(
+                url + query,
+                    new String[] {"Authorization", "Bearer " + Credentials.access_token},
+                    JsonObject.class
+                ).getAsJsonObject("tracks");
+
             JsonArray jsonArray = jsonObject.getAsJsonArray("items");
             return gson.fromJson(jsonArray.get(0).getAsJsonObject(), Track.class);
         } catch (Exception _) {

@@ -2,10 +2,12 @@ package com.raifernando.spotify;
 
 import com.google.gson.JsonObject;
 import com.raifernando.util.PropertiesFile;
+import com.raifernando.util.Request;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Map;
 
 public class Credentials {
     public static String client_id;
@@ -42,14 +44,20 @@ public class Credentials {
     }
 
     public static void accessToken() throws IOException, InterruptedException {
-        System.out.println("Requested new access_token.");
+        System.out.println("Requested new access token.");
 
-        String url = "https://accounts.spotify.com/api/token";
-        String headerName = "Content-Type";
-        String headerValue = "application/x-www-form-urlencoded";
-        String httpBody = "grant_type=client_credentials&client_id=" + client_id + "&client_secret=" + client_secret;
+        Map<String, String> body = Map.of(
+                "grant_type", "client_credentials",
+                "client_id", client_id,
+                "client_secret", client_secret
+        );
 
-        JsonObject jsonObject = Request.requestPost(url, headerName, headerValue, httpBody, JsonObject.class);
+        JsonObject jsonObject = Request.requestPost(
+                "https://accounts.spotify.com/api/token",
+                body,
+                new String[] {"Content-Type", "application/x-www-form-urlencoded"},
+                JsonObject.class);
+
         access_token = jsonObject.get("access_token").getAsString();
         accessTokenTime = LocalDateTime.now();
         saveAccessToken(access_token);

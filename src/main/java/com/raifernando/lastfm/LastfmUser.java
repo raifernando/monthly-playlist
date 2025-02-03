@@ -6,8 +6,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.raifernando.util.DateRange;
 import com.raifernando.util.PropertiesFile;
+import com.raifernando.util.Request;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -41,10 +41,11 @@ public class LastfmUser {
             throw new InvalidParameterException();
     }
 
-    public ArrayList<LastfmTrack> getTopTracks() throws IOException, InterruptedException {
-        String url = "http://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=" + user;
+    public ArrayList<LastfmTrack> getTopTracks() {
+        String url = "http://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=" + user
+                + "&api_key=" + LastfmCredentials.api_key +"&format=json";
 
-        JsonObject jsonObject = Request.requestGet(url);
+        JsonObject jsonObject = Request.requestGetNoHeader(url, JsonObject.class);
 
         System.out.println(jsonObject.toString());
 
@@ -59,11 +60,12 @@ public class LastfmUser {
         return gson.fromJson(tracksJson, arrayType);
     }
 
-    public ArrayList<LastfmTrack> getRecentTracks(DateRange dateRange) throws IOException, InterruptedException {
+    public ArrayList<LastfmTrack> getRecentTracks(DateRange dateRange) {
         System.out.print("Requesting Lastfm data. Page: ");
 
         String url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="
-                + user + "&from=" + dateRange.getStartDate() + "&to=" + dateRange.getEndDate() +"&limit=200";
+                + user + "&from=" + dateRange.getStartDate() + "&to=" + dateRange.getEndDate() +"&limit=200"
+                + "&api_key=" + LastfmCredentials.api_key +"&format=json";
 
         Gson gson = new Gson();
 
@@ -75,7 +77,7 @@ public class LastfmUser {
         do {
             System.out.printf("%d ", currentPage);
 
-            JsonObject jsonObject = Request.requestGet(url + "&page=" + currentPage)
+            JsonObject jsonObject = Request.requestGetNoHeader(url + "&page=" + currentPage, JsonObject.class)
                     .getAsJsonObject("recenttracks");
 
             if (currentPage == 1)

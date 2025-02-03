@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.raifernando.localserver.AuthCodeReceiver;
 import com.raifernando.util.PropertiesFile;
 import com.raifernando.util.QueryGenerator;
+import com.raifernando.util.Request;
 
 import java.io.*;
 import java.time.LocalDateTime;

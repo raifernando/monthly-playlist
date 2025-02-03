@@ -3,6 +3,7 @@ package com.raifernando.spotify;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.raifernando.lastfm.LastfmTrack;
+import com.raifernando.util.Request;
 
 import java.io.IOException;
 import java.util.ArrayList;

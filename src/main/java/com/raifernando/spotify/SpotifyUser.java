@@ -1,12 +1,15 @@
 package com.raifernando.spotify;
 
-import java.io.IOException;
+import com.raifernando.util.Request;
 
 public class SpotifyUser {
     private String id = null;
 
-    public static SpotifyUser getCurrentUser() throws IOException, InterruptedException {
-        return Request.requestGet("https://api.spotify.com/v1/me", OAuth.accessToken, SpotifyUser.class);
+    public static SpotifyUser getCurrentUser() {
+        return Request.requestGet(
+                "https://api.spotify.com/v1/me",
+                new String[] {"Authorization", "Bearer " + OAuth.accessToken},
+                SpotifyUser.class);
     }
 
     public String getId() {
