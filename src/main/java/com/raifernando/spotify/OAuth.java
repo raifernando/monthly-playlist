@@ -20,28 +20,28 @@ public class OAuth {
     public static LocalDateTime authCodeTime;
 
     public static String accessToken;
+    public static String refreshToken;
     public static LocalDateTime accessTokenTime;
 
     public static void getAccessCode() throws Exception {
-        // TODO: create custom exceptions for different errors while requesting
-        // TODO: refresh token
-
-//        try {
-//            String storedTime = PropertiesFile.getFromFile("USER_ACCESS_CODE_TIME");
-//            if (storedTime != null) {
-//                accessTokenTime = LocalDateTime.parse(storedTime);
-//                LocalDateTime anHourAgo = LocalDateTime.now().minusHours(1);
-//                if (!anHourAgo.isAfter(accessTokenTime)) {
-//                    accessToken = PropertiesFile.getFromFile("AUTHORIZATION_CODE");
-//                    return;
-//                }
-//                System.out.println("User's access token expired. Authentication required.");
-//            }
-//            else {
-//                authCodeTime = null;
-//                accessTokenTime = LocalDateTime.now();
-//            }
-//        } catch (DateTimeParseException _) {}
+        try {
+            String storedTime = PropertiesFile.getFromFile("USER_ACCESS_CODE_TIME");
+            if (storedTime != null) {
+                accessTokenTime = LocalDateTime.parse(storedTime);
+                LocalDateTime anHourAgo = LocalDateTime.now().minusHours(1);
+                if (!anHourAgo.isAfter(accessTokenTime)) {
+                    accessToken = PropertiesFile.getFromFile("USER_ACCESS_CODE");
+                    return;
+                }
+                refreshAccessToken();
+                return;
+            }
+            else {
+                authCodeTime = null;
+                accessTokenTime = LocalDateTime.now();
+                refreshToken = null;
+            }
+        } catch (DateTimeParseException _) {}
 
         OAuth.requestAuthorizationCode();
 
@@ -63,9 +63,41 @@ public class OAuth {
 
         try {
             accessToken = json.get("access_token").getAsString();
+            refreshToken = json.get("refresh_token").getAsString();
+            accessTokenTime = LocalDateTime.now();
             saveUserAccessCode();
         } catch (NullPointerException e) {
-            System.out.println("Error getting users' access code");
+            System.out.println("Error getting users' access token");
+        }
+    }
+
+    private static void refreshAccessToken() throws IOException, InterruptedException {
+        System.out.println("Refreshing access token.");
+        refreshToken = PropertiesFile.getFromFile("REFRESH_TOKEN");
+
+        Map<String, String> body = Map.of(
+                "grant_type", "refresh_token",
+                "refresh_token", refreshToken
+        );
+        String bodyQuery = QueryGenerator.generateQueryString(body);
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(bodyQuery))
+                .uri(URI.create("https://accounts.spotify.com/api/token"))
+                .header("content-type", "application/x-www-form-urlencoded")
+                .header("Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.client_id + ":" + Credentials.client_secret).getBytes()))
+                .build();
+
+        JsonObject json = Request.requestPost(httpRequest, JsonObject.class);
+        System.out.println(json);
+
+        try {
+            accessToken = json.get("access_token").getAsString();
+            accessTokenTime = LocalDateTime.now();
+            saveUserAccessCode();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            System.out.println("Error refreshing access token");
         }
     }
 
@@ -100,6 +132,7 @@ public class OAuth {
     private static void saveUserAccessCode() throws IOException {
         PropertiesFile.storeInFile("USER_ACCESS_CODE", accessToken);
         PropertiesFile.storeInFile("USER_ACCESS_CODE_TIME", accessTokenTime.toString());
+        PropertiesFile.storeInFile("REFRESH_TOKEN", refreshToken);
     }
 
     private static void saveAuthorizationCode() throws IOException {
