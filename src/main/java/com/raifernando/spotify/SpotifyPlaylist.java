@@ -1,10 +1,10 @@
 package com.raifernando.spotify;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.raifernando.lastfm.LastfmTrack;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpRequest;
 import java.util.ArrayList;
 
 public class SpotifyPlaylist {
@@ -22,17 +22,20 @@ public class SpotifyPlaylist {
             return null;
         }
 
-        String url = "https://api.spotify.com/v1/users/" + user.getId() + "/playlists";
-        String jsonBody = "{\"name\":\"Playlist name\"}";
+        JsonObject jsonBody = new JsonObject();
+        jsonBody.addProperty("name", "Playstsafaf");
 
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .uri(URI.create(url))
-                .header("content-type", "application/json")
-                .header("Authorization", "Bearer " + OAuth.accessToken)
-                .build();
+        String [] headers = {
+                "content-type", "application/json",
+                "Authorization", "Bearer " + OAuth.accessToken
+        };
 
-        return Request.requestPost(httpRequest, SpotifyPlaylist.class);
+        return Request.requestPost(
+                "https://api.spotify.com/v1/users/" + user.getId() + "/playlists",
+                jsonBody.toString(),
+                headers,
+                SpotifyPlaylist.class
+        );
     }
 
     public void addTrack(Track track) throws IOException, InterruptedException {
@@ -41,55 +44,58 @@ public class SpotifyPlaylist {
 
         System.out.println("Adding " + track.getName() + " - " + track.getArtistName());
 
-        String url = "https://api.spotify.com/v1/playlists/" + id + "/tracks";
-        String jsonBody = "{\"uris\": [\"" + track.getUri() + "\"]}";
+        JsonObject jsonBody = new JsonObject();
+        JsonArray jsonArray = new JsonArray();
+        jsonArray.add(track.getUri());
+        jsonBody.add("uris", jsonArray);
 
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .uri(URI.create(url))
-                .header("content-type", "application/json")
-                .header("Authorization", "Bearer " + OAuth.accessToken)
-                .build();
+        String [] headers = {
+                "content-type", "application/json",
+                "Authorization", "Bearer " + OAuth.accessToken
+        };
 
-        var response = Request.requestPost(httpRequest);
-        if (response.statusCode() != 201) {
+        SpotifyPlaylist response = Request.requestPost(
+                "https://api.spotify.com/v1/playlists/" + id + "/tracks",
+                jsonBody.toString(),
+                headers,
+                SpotifyPlaylist.class
+        );
+
+        if (response == null) {
             System.out.println("------ Error adding track [" + track.getName() + "]");
-            System.out.println(response.body());
         }
     }
 
     public void addMultipleTracks(SpotifyPlaylist playlist, ArrayList<LastfmTrack> tracks) throws IOException, InterruptedException {
         System.out.println("Adding tracks to playlist");
-        ArrayList<String> listOfUris = new ArrayList<>();
+
+        JsonArray jsonArray = new JsonArray();
 
         for (LastfmTrack track : tracks) {
             Track spotifyTrack = Track.searchForTrack(track.getName(), track.getArtist().getName(), track.getAlbum().getName());
-            listOfUris.add(spotifyTrack.getUri());
+            jsonArray.add(spotifyTrack.getUri());
         }
 
-        String url = "https://api.spotify.com/v1/playlists/" + id + "/tracks";
-        StringBuilder jsonBody = new StringBuilder("{\"uris\": [");
+        JsonObject jsonBody = new JsonObject();
+        jsonBody.add("uris", jsonArray);
 
-        for (String uri : listOfUris) {
-            jsonBody.append("\"").append(uri).append("\",");
-        }
-        jsonBody.deleteCharAt(jsonBody.length() - 1); // remove last ','
-        jsonBody.append("]}");
+        String [] headers = {
+                "content-type", "application/json",
+                "Authorization", "Bearer " + OAuth.accessToken
+        };
 
-        System.out.println(jsonBody);
+        SpotifyPlaylist response = Request.requestPost(
+                "https://api.spotify.com/v1/playlists/" + id + "/tracks",
+                jsonBody.toString(),
+                headers,
+                SpotifyPlaylist.class
+        );
 
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody.toString()))
-                .uri(URI.create(url))
-                .header("content-type", "application/json")
-                .header("Authorization", "Bearer " + OAuth.accessToken)
-                .build();
-
-        var response = Request.requestPost(httpRequest);
-        if (response.statusCode() != 201) {
+        if (response == null) {
             System.out.println("------ Error adding tracks");
-            System.out.println(response.body());
         }
+
+        System.out.printf("Tracks added in: %s\n", playlist.getURL());
     }
 
     public void addTracks(SpotifyPlaylist playlist, ArrayList<LastfmTrack> tracks) throws IOException, InterruptedException {

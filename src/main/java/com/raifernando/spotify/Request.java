@@ -1,12 +1,14 @@
 package com.raifernando.spotify;
 
 import com.google.gson.Gson;
+import com.raifernando.util.QueryGenerator;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Map;
 
 public class Request {
     public static <T> T requestGet(String url, Class<T> tClass) throws IOException, InterruptedException {
@@ -66,5 +68,21 @@ public class Request {
         HttpClient httpClient = HttpClient.newHttpClient();
 
         return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public static <T> T requestPost(String url, String body, String [] headers, Class<T> tClass) throws IOException, InterruptedException {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .uri(URI.create(url))
+                .headers(headers)
+                .build();
+
+        return requestPost(httpRequest, tClass);
+    }
+
+    public static <T> T requestPost(String url, Map<String, String> body, String [] headers, Class<T> tClass) throws IOException, InterruptedException {
+        String bodyQuery = QueryGenerator.generateQueryString(body);
+
+        return requestPost(url, bodyQuery, headers, tClass);
     }
 }

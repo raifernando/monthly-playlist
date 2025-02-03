@@ -6,7 +6,6 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.OutputStream;
 import java.net.URI;
-import java.time.LocalDateTime;
 
 public class AuthCodeReceiver {
     private static HttpServer server;
@@ -36,11 +35,7 @@ class CallbackHandler implements HttpHandler {
         code = code.substring(0, code.length() - 6); // Remove "&state" part
 
         OAuth.latch.countDown();
-
         OAuth.authCode = code;
-        OAuth.authCodeTime = LocalDateTime.now();
-
-        System.out.println("Authorization code: " + code);
 
         // Send a response back to the browser
         String response = "Authorization code received!";

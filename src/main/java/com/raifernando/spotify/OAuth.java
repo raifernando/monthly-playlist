@@ -6,8 +6,6 @@ import com.raifernando.util.PropertiesFile;
 import com.raifernando.util.QueryGenerator;
 
 import java.io.*;
-import java.net.URI;
-import java.net.http.HttpRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
@@ -17,107 +15,62 @@ import java.util.concurrent.CountDownLatch;
 public class OAuth {
     public static String authCode;
     public static CountDownLatch latch = new CountDownLatch(1);
-    public static LocalDateTime authCodeTime;
 
     public static String accessToken;
-    public static String refreshToken;
-    public static LocalDateTime accessTokenTime;
+    private static String refreshToken;
 
+    /**
+     * Get the access code for the authenticated user. The code is stored in this class field.
+     * @throws Exception
+     */
     public static void getAccessCode() throws Exception {
-        try {
-            String storedTime = PropertiesFile.getFromFile("USER_ACCESS_CODE_TIME");
-            if (storedTime != null) {
-                accessTokenTime = LocalDateTime.parse(storedTime);
-                LocalDateTime anHourAgo = LocalDateTime.now().minusHours(1);
-                if (!anHourAgo.isAfter(accessTokenTime)) {
-                    accessToken = PropertiesFile.getFromFile("USER_ACCESS_CODE");
-                    return;
-                }
-                refreshAccessToken();
-                return;
-            }
-            else {
-                authCodeTime = null;
-                accessTokenTime = LocalDateTime.now();
-                refreshToken = null;
-            }
-        } catch (DateTimeParseException _) {}
+        accessToken = PropertiesFile.getFromFile("USER_ACCESS_CODE");
+        if (isTokenExpired("USER_ACCESS_CODE_TIME", 60))
+            refreshAccessToken();
 
-        OAuth.requestAuthorizationCode();
+        if (accessToken == null)
+            requestAccessToken();
+    }
+
+    /**
+     * Request a new access token for the current user, using the authorization code.
+     * @throws Exception
+     */
+    private static void requestAccessToken() throws Exception {
+        requestAuthorizationCode();
 
         Map<String, String> body = Map.of(
                 "grant_type", "authorization_code",
                 "code", authCode,
                 "redirect_uri", "http://localhost:8080/callback"
         );
-        String bodyQuery = QueryGenerator.generateQueryString(body);
 
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(bodyQuery))
-                .uri(URI.create("https://accounts.spotify.com/api/token"))
-                .header("content-type", "application/x-www-form-urlencoded")
-                .header("Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.client_id + ":" + Credentials.client_secret).getBytes()))
-                .build();
+        String [] headers = {
+                "content-type", "application/x-www-form-urlencoded",
+                "Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.client_id + ":" + Credentials.client_secret).getBytes())
+        };
 
-        JsonObject json = Request.requestPost(httpRequest, JsonObject.class);
+        JsonObject json = Request.requestPost(
+                "https://accounts.spotify.com/api/token",
+                body,
+                headers,
+                JsonObject.class
+        );
 
         try {
             accessToken = json.get("access_token").getAsString();
             refreshToken = json.get("refresh_token").getAsString();
-            accessTokenTime = LocalDateTime.now();
             saveUserAccessCode();
-        } catch (NullPointerException e) {
-            System.out.println("Error getting users' access token");
+        } catch (NullPointerException | IOException e) {
+            System.out.println("Error getting the user's access token");
         }
     }
 
-    private static void refreshAccessToken() throws IOException, InterruptedException {
-        System.out.println("Refreshing access token.");
-        refreshToken = PropertiesFile.getFromFile("REFRESH_TOKEN");
-
-        Map<String, String> body = Map.of(
-                "grant_type", "refresh_token",
-                "refresh_token", refreshToken
-        );
-        String bodyQuery = QueryGenerator.generateQueryString(body);
-
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(bodyQuery))
-                .uri(URI.create("https://accounts.spotify.com/api/token"))
-                .header("content-type", "application/x-www-form-urlencoded")
-                .header("Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.client_id + ":" + Credentials.client_secret).getBytes()))
-                .build();
-
-        JsonObject json = Request.requestPost(httpRequest, JsonObject.class);
-        System.out.println(json);
-
-        try {
-            accessToken = json.get("access_token").getAsString();
-            accessTokenTime = LocalDateTime.now();
-            saveUserAccessCode();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            System.out.println("Error refreshing access token");
-        }
-    }
-
-    public static void requestAuthorizationCode() throws Exception {
-//        try {
-//            String storedTime = PropertiesFile.getFromFile("AUTHORIZATION_CODE_TIME");
-//            if (storedTime != null && authCodeTime != null) {
-//                authCodeTime = LocalDateTime.parse(storedTime);
-//                LocalDateTime anHourAgo = LocalDateTime.now().minusHours(1);
-//                if (!anHourAgo.isAfter(authCodeTime)) {
-//                    authCode = PropertiesFile.getFromFile("AUTHORIZATION_CODE");
-//                    return;
-//                }
-//                System.out.println("Authorization code expired.");
-//            }
-//            else {
-//                authCodeTime = LocalDateTime.now();
-//            }
-//        } catch (DateTimeParseException _) {}
-
+    /**
+     * Create a local server to authenticate the user and get the authorization code.
+     * @throws Exception
+     */
+    private static void requestAuthorizationCode() throws Exception {
         AuthCodeReceiver.startServer();
 
         System.out.println(spotifyLoginUrl());
@@ -129,17 +82,54 @@ public class OAuth {
         saveAuthorizationCode();
     }
 
+    /**
+     * Send a request to refresh the stored access token.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private static void refreshAccessToken() throws IOException, InterruptedException {
+        System.out.println("Refreshing access token.");
+        refreshToken = PropertiesFile.getFromFile("REFRESH_TOKEN");
+
+        Map<String, String> body = Map.of(
+                "grant_type", "refresh_token",
+                "refresh_token", refreshToken
+        );
+
+        String [] headers = {
+                "content-type", "application/x-www-form-urlencoded",
+                "Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.client_id + ":" + Credentials.client_secret).getBytes())
+        };
+
+        JsonObject json = Request.requestPost(
+                "https://accounts.spotify.com/api/token",
+                body,
+                headers,
+                JsonObject.class
+        );
+
+        try {
+            accessToken = json.get("access_token").getAsString();
+            saveUserAccessCode();
+        } catch (NullPointerException e) {
+            System.out.println("Error refreshing access token");
+        }
+    }
+
     private static void saveUserAccessCode() throws IOException {
         PropertiesFile.storeInFile("USER_ACCESS_CODE", accessToken);
-        PropertiesFile.storeInFile("USER_ACCESS_CODE_TIME", accessTokenTime.toString());
+        PropertiesFile.storeInFile("USER_ACCESS_CODE_TIME", LocalDateTime.now().toString());
         PropertiesFile.storeInFile("REFRESH_TOKEN", refreshToken);
     }
 
     private static void saveAuthorizationCode() throws IOException {
         PropertiesFile.storeInFile("AUTHORIZATION_CODE", authCode);
-        PropertiesFile.storeInFile("AUTHORIZATION_CODE_TIME", authCodeTime.toString());
+        PropertiesFile.storeInFile("AUTHORIZATION_CODE_TIME", LocalDateTime.now().toString());
     }
 
+    /**
+     * @return - the URL for authentication
+     */
     private static String spotifyLoginUrl() {
         String state = "87hasfoJHhsajfHJG2";
 
@@ -154,5 +144,25 @@ public class OAuth {
         );
 
         return "https://accounts.spotify.com/authorize?" + QueryGenerator.generateQueryString(query);
+    }
+
+    /**
+     * Checks if the token has expired based on the stored time.
+     * @param keyOfStoredTime - key for retrieving the stored time from the Properties file
+     * @param minutes - the number of minutes the token is valid for
+     * @return true if the token is expired, false otherwise
+     */
+    private static boolean isTokenExpired(String keyOfStoredTime, int minutes) {
+        try {
+            String storedTime = PropertiesFile.getFromFile(keyOfStoredTime);
+            if (storedTime != null) {
+                LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(minutes);
+                return LocalDateTime.parse(storedTime).isBefore(expirationTime);
+
+            }
+        } catch (DateTimeParseException e) {
+            // If the date is invalid, treat it as expired
+        }
+        return false;
     }
 }
