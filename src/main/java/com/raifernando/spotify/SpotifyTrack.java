@@ -12,29 +12,29 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class Track {
+public class SpotifyTrack {
     private String id;
-    private Album album;
-    private ArrayList<Artist> artists;
+    private SpotifyAlbum album;
+    private ArrayList<SpotifyArtist> artists;
     private String name;
     private int popularity;
     private int track_number;
     private String uri;
 
-    public static Track getTrack(String trackId) {
+    public static SpotifyTrack getTrack(String trackId) {
         String requestUrl = "https://api.spotify.com/v1/tracks/" + trackId;
 
-        Track track = Request.requestGet(
+        SpotifyTrack track = Request.requestGet(
                 requestUrl,
                 new String[] {"Authorization", "Bearer " + Credentials.spotifyAccessToken},
-                Track.class
+                SpotifyTrack.class
         );
 
         System.out.println(track.toString());
         return track;
     }
 
-    public static Track searchForTrack(String trackName, String artistName, String albumName) {
+    public static SpotifyTrack searchForTrack(String trackName, String artistName, String albumName) {
         String url = "https://api.spotify.com/v1/search?q=";
 
         Map<String, String> map = Map.of(
@@ -55,14 +55,14 @@ public class Track {
                 ).getAsJsonObject("tracks");
 
             JsonArray jsonArray = jsonObject.getAsJsonArray("items");
-            return gson.fromJson(jsonArray.get(0).getAsJsonObject(), Track.class);
+            return gson.fromJson(jsonArray.get(0).getAsJsonObject(), SpotifyTrack.class);
         } catch (Exception _) {
             System.out.printf("Track %s not found.\n", trackName);
             return null;
         }
     }
 
-    public ArrayList<Artist> getArtists() {
+    public ArrayList<SpotifyArtist> getArtists() {
         return artists;
     }
 

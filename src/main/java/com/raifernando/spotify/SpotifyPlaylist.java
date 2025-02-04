@@ -39,7 +39,7 @@ public class SpotifyPlaylist {
         );
     }
 
-    public void addTrack(Track track) throws IOException, InterruptedException {
+    public void addTrack(SpotifyTrack track) throws IOException, InterruptedException {
         if (track == null)
             return;
 
@@ -73,7 +73,7 @@ public class SpotifyPlaylist {
         JsonArray jsonArray = new JsonArray();
 
         for (LastfmTrack track : tracks) {
-            Track spotifyTrack = Track.searchForTrack(track.getName(), track.getArtist().getName(), track.getAlbum().getName());
+            SpotifyTrack spotifyTrack = SpotifyTrack.searchForTrack(track.getName(), track.getArtist().getName(), track.getAlbum().getName());
             jsonArray.add(spotifyTrack.getUri());
         }
 
@@ -101,7 +101,7 @@ public class SpotifyPlaylist {
 
     public void addTracks(SpotifyPlaylist playlist, ArrayList<LastfmTrack> tracks) throws IOException, InterruptedException {
         for (LastfmTrack track : tracks) {
-            Track spotifyTrack = Track.searchForTrack(track.getName(), track.getArtist().getName(), track.getAlbum().getName());
+            SpotifyTrack spotifyTrack = SpotifyTrack.searchForTrack(track.getName(), track.getArtist().getName(), track.getAlbum().getName());
             playlist.addTrack(spotifyTrack);
         }
 

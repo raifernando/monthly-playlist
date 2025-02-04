@@ -10,16 +10,16 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 
-public class Album {
+public class SpotifyAlbum {
     private String id;
     private String album_type;
     private int total_tracks;
     private String name;
     private String release_date;
     private int popularity;
-    public ArrayList<Artist> artists;
+    public ArrayList<SpotifyArtist> artists;
 
-    public static Album getAlbum(String albumId) throws IOException, InterruptedException {
+    public static SpotifyAlbum getAlbum(String albumId) throws IOException, InterruptedException {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.spotify.com/v1/albums/" + albumId))
                 .header("Authorization", "Bearer " + Credentials.spotifyAccessToken)
@@ -37,7 +37,7 @@ public class Album {
         }
 
         Gson gson = new Gson();
-        return gson.fromJson(response.body(), Album.class);
+        return gson.fromJson(response.body(), SpotifyAlbum.class);
     }
 
     @Override

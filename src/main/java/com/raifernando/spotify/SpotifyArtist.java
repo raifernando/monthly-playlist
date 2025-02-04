@@ -9,7 +9,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-public class Artist {
+public class SpotifyArtist {
     private String id;
     private String name;
     private int popularity;
@@ -22,7 +22,7 @@ public class Artist {
         return id;
     }
 
-    public static Artist getArtist(String id) throws IOException, InterruptedException {
+    public static SpotifyArtist getArtist(String id) throws IOException, InterruptedException {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.spotify.com/v1/artists/" + id))
                 .header("Authorization", "Bearer " + Credentials.spotifyAccessToken)
@@ -38,7 +38,7 @@ public class Artist {
         if (statusCode == 200) {
             System.out.println(response.body());
             Gson gson = new Gson();
-            Artist artist = gson.fromJson(response.body(), Artist.class);
+            SpotifyArtist artist = gson.fromJson(response.body(), SpotifyArtist.class);
             System.out.println(artist.toString());
             return artist;
         }
