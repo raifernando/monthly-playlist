@@ -37,8 +37,8 @@ public class Credentials {
 
         Map<String, String> body = Map.of(
                 "grant_type", "client_credentials",
-                "SpotifyClientId", spotifyClientId,
-                "spotifyClientSecret", spotifyClientSecret
+                "client_id", spotifyClientId,
+                "client_secret", spotifyClientSecret
         );
 
         JsonObject jsonObject = Request.requestPost(
@@ -47,7 +47,7 @@ public class Credentials {
                 new String[] {"Content-Type", "application/x-www-form-urlencoded"},
                 JsonObject.class);
 
-        spotifyAccessToken = jsonObject.get("spotifyAccessToken").getAsString();
+        spotifyAccessToken = jsonObject.get("access_token").getAsString();
         saveAccessToken(spotifyAccessToken);
     }
 
