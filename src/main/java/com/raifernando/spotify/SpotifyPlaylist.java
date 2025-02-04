@@ -17,14 +17,14 @@ public class SpotifyPlaylist {
         this.id = id;
     }
 
-    public static SpotifyPlaylist createPlaylist(SpotifyUser user) throws IOException, InterruptedException {
+    public static SpotifyPlaylist createPlaylist(SpotifyUser user, String name) throws IOException, InterruptedException {
         if (OAuth.accessToken == null || user.getId() == null) {
             System.out.println("User not authenticated. Failed to create playlist.");
             return null;
         }
 
         JsonObject jsonBody = new JsonObject();
-        jsonBody.addProperty("name", "Playstsafaf");
+        jsonBody.addProperty("name", name);
 
         String [] headers = {
                 "content-type", "application/json",
@@ -37,6 +37,10 @@ public class SpotifyPlaylist {
                 headers,
                 SpotifyPlaylist.class
         );
+    }
+
+    public static SpotifyPlaylist createPlaylist(SpotifyUser user) throws IOException, InterruptedException {
+        return createPlaylist(user, "monthly-playlist");
     }
 
     public void addTrack(SpotifyTrack track) throws IOException, InterruptedException {

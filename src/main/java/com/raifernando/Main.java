@@ -47,10 +47,10 @@ public class Main {
         OAuth.getAccessCode();
 
         ArrayList<LastfmTrack> tracks = user.getRecentTracks(dateRange);
-        tracks = user.getUserTopTracks(tracks, 0, 30, 0);
+        tracks = user.getUserTopTracks(tracks, 0, 3, 0);
 
         SpotifyUser spotifyUser = SpotifyUser.getCurrentUser();
-        SpotifyPlaylist playlist = SpotifyPlaylist.createPlaylist(spotifyUser);
+        SpotifyPlaylist playlist = SpotifyPlaylist.createPlaylist(spotifyUser, dateRange.getDateAsString());
 
         playlist.addMultipleTracks(playlist, tracks);
     }

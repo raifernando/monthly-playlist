@@ -43,6 +43,11 @@ public class DateRange {
         return date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
     }
 
+    public String getDateAsString() {
+        return LocalDate.ofEpochDay(startDate / 86400).getMonth().toString().toLowerCase() + ":"
+            + LocalDate.ofEpochDay(startDate / 86400).getYear();
+    }
+
     public long getStartDate() {
         return startDate;
     }
