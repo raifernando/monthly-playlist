@@ -1,14 +1,13 @@
 package com.raifernando.spotify;
 
 import com.google.gson.Gson;
+import com.raifernando.util.Credentials;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 
 public class Artist {
     private String id;
@@ -26,7 +25,7 @@ public class Artist {
     public static Artist getArtist(String id) throws IOException, InterruptedException {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.spotify.com/v1/artists/" + id))
-                .header("Authorization", "Bearer " + Credentials.access_token)
+                .header("Authorization", "Bearer " + Credentials.spotifyAccessToken)
                 .GET()
                 .build();
 
@@ -45,7 +44,7 @@ public class Artist {
         }
         else if (statusCode == 401) {
             System.out.println("Token expired. Requesting new one.");
-            Credentials.accessToken();
+            Credentials.getAccessToken();
             return getArtist(id);
         }
 

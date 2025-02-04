@@ -34,7 +34,8 @@ public class PropertiesFile {
             }
         }
 
-        return properties.getProperty(key);
+        String property = properties.getProperty(key);
+        return (property.isEmpty() ? null : property);
     }
 
     public static void storeInFile(String key, String value) throws IOException {
@@ -66,5 +67,9 @@ public class PropertiesFile {
             fileOutput.close();
             fileOutput = null;
         }
+    }
+
+    public static String getFileName() {
+        return FILE_NAME;
     }
 }

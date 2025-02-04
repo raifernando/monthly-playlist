@@ -3,6 +3,7 @@ package com.raifernando.spotify;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.raifernando.util.Credentials;
 import com.raifernando.util.QueryGenerator;
 import com.raifernando.util.Request;
 
@@ -25,7 +26,7 @@ public class Track {
 
         Track track = Request.requestGet(
                 requestUrl,
-                new String[] {"Authorization", "Bearer " + Credentials.access_token},
+                new String[] {"Authorization", "Bearer " + Credentials.spotifyAccessToken},
                 Track.class
         );
 
@@ -49,7 +50,7 @@ public class Track {
         try {
             JsonObject jsonObject = Request.requestGet(
                 url + query,
-                    new String[] {"Authorization", "Bearer " + Credentials.access_token},
+                    new String[] {"Authorization", "Bearer " + Credentials.spotifyAccessToken},
                     JsonObject.class
                 ).getAsJsonObject("tracks");
 

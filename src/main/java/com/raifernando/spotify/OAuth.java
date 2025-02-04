@@ -2,13 +2,13 @@ package com.raifernando.spotify;
 
 import com.google.gson.JsonObject;
 import com.raifernando.localserver.AuthCodeReceiver;
+import com.raifernando.util.Credentials;
 import com.raifernando.util.PropertiesFile;
 import com.raifernando.util.QueryGenerator;
 import com.raifernando.util.Request;
 
 import java.io.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -26,7 +26,7 @@ public class OAuth {
      */
     public static void getAccessCode() throws Exception {
         accessToken = PropertiesFile.getFromFile("USER_ACCESS_CODE");
-        if (isTokenExpired("USER_ACCESS_CODE_TIME", 60))
+        if (Credentials.isTokenExpired("USER_ACCESS_CODE_TIME", 60))
             refreshAccessToken();
 
         if (accessToken == null)
@@ -48,7 +48,7 @@ public class OAuth {
 
         String [] headers = {
                 "content-type", "application/x-www-form-urlencoded",
-                "Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.client_id + ":" + Credentials.client_secret).getBytes())
+                "Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.spotifyClientId + ":" + Credentials.spotifyClientSecret).getBytes())
         };
 
         JsonObject json = Request.requestPost(
@@ -99,7 +99,7 @@ public class OAuth {
 
         String [] headers = {
                 "content-type", "application/x-www-form-urlencoded",
-                "Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.client_id + ":" + Credentials.client_secret).getBytes())
+                "Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.spotifyClientId + ":" + Credentials.spotifyClientSecret).getBytes())
         };
 
         JsonObject json = Request.requestPost(
@@ -141,29 +141,9 @@ public class OAuth {
                 "state", state,
                 "response_type", "code",
                 "scope", scope,
-                "client_id", Credentials.client_id
+                "client_id", Credentials.spotifyClientId
         );
 
         return "https://accounts.spotify.com/authorize?" + QueryGenerator.generateQueryString(query);
-    }
-
-    /**
-     * Checks if the token has expired based on the stored time.
-     * @param keyOfStoredTime - key for retrieving the stored time from the Properties file
-     * @param minutes - the number of minutes the token is valid for
-     * @return true if the token is expired, false otherwise
-     */
-    private static boolean isTokenExpired(String keyOfStoredTime, int minutes) {
-        try {
-            String storedTime = PropertiesFile.getFromFile(keyOfStoredTime);
-            if (storedTime != null) {
-                LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(minutes);
-                return LocalDateTime.parse(storedTime).isBefore(expirationTime);
-
-            }
-        } catch (DateTimeParseException e) {
-            // If the date is invalid, treat it as expired
-        }
-        return false;
     }
 }

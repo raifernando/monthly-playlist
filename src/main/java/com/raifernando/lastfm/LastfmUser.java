@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.raifernando.util.Credentials;
 import com.raifernando.util.DateRange;
 import com.raifernando.util.PropertiesFile;
 import com.raifernando.util.Request;
@@ -43,7 +44,7 @@ public class LastfmUser {
 
     public ArrayList<LastfmTrack> getTopTracks() {
         String url = "http://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=" + user
-                + "&api_key=" + LastfmCredentials.api_key +"&format=json";
+                + "&api_key=" + Credentials.lastfmApiKey +"&format=json";
 
         JsonObject jsonObject = Request.requestGetNoHeader(url, JsonObject.class);
 
@@ -65,7 +66,7 @@ public class LastfmUser {
 
         String url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="
                 + user + "&from=" + dateRange.getStartDate() + "&to=" + dateRange.getEndDate() +"&limit=200"
-                + "&api_key=" + LastfmCredentials.api_key +"&format=json";
+                + "&api_key=" + Credentials.lastfmApiKey +"&format=json";
 
         Gson gson = new Gson();
 

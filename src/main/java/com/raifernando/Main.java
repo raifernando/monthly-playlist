@@ -1,9 +1,9 @@
 package com.raifernando;
 
-import com.raifernando.lastfm.LastfmCredentials;
 import com.raifernando.lastfm.LastfmTrack;
 import com.raifernando.lastfm.LastfmUser;
 import com.raifernando.spotify.*;
+import com.raifernando.util.Credentials;
 import com.raifernando.util.DateRange;
 import com.raifernando.util.PropertiesFile;
 
@@ -13,8 +13,19 @@ import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+        if (args.length == 0) {
+            System.out.println("Date for request not provided.");
+            System.exit(0);
+        }
+
         // Setup api credentials
         PropertiesFile.setFileName("config.properties");
+        try {
+            Credentials.loadKeys();
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
+        }
 
         LastfmUser user = new LastfmUser();
         try {
@@ -33,16 +44,14 @@ public class Main {
             System.exit(0);
         }
 
-        Credentials.loadKeys();
         OAuth.getAccessCode();
-        LastfmCredentials.loadKeys();
 
         ArrayList<LastfmTrack> tracks = user.getRecentTracks(dateRange);
         tracks = user.getUserTopTracks(tracks, 0, 30, 0);
 
         SpotifyUser spotifyUser = SpotifyUser.getCurrentUser();
-        SpotifyPlaylist playlist = new SpotifyPlaylist("4gpClYRjmw4BSM3dRG2m1S");
+        SpotifyPlaylist playlist = SpotifyPlaylist.createPlaylist(spotifyUser);
 
-        playlist.addTracks(playlist, tracks);
+        playlist.addMultipleTracks(playlist, tracks);
     }
 }

@@ -1,6 +1,7 @@
 package com.raifernando.spotify;
 
 import com.google.gson.Gson;
+import com.raifernando.util.Credentials;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,11 +22,9 @@ public class Album {
     public static Album getAlbum(String albumId) throws IOException, InterruptedException {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.spotify.com/v1/albums/" + albumId))
-                .header("Authorization", "Bearer " + Credentials.access_token)
+                .header("Authorization", "Bearer " + Credentials.spotifyAccessToken)
                 .GET()
                 .build();
-
-        System.out.println(Credentials.access_token);
 
         HttpClient httpClient = HttpClient.newHttpClient();
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
@@ -33,7 +32,7 @@ public class Album {
 
         if (statusCode == 401) {
             System.out.println("Token expired. Requesting new one.");
-            Credentials.accessToken();
+            Credentials.getAccessToken();
             return getAlbum(albumId);
         }
 
