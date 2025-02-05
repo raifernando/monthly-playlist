@@ -5,7 +5,6 @@ import com.raifernando.lastfm.LastfmUser;
 import com.raifernando.spotify.*;
 import com.raifernando.util.Credentials;
 import com.raifernando.util.DateRange;
-import com.raifernando.util.PropertiesFile;
 
 import java.security.InvalidParameterException;
 import java.text.ParseException;
@@ -19,7 +18,6 @@ public class Main {
         }
 
         // Setup api credentials
-        PropertiesFile.setFileName("config.properties");
         try {
             Credentials.loadKeys();
         } catch (NullPointerException e) {

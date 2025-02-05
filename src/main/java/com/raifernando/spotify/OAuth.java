@@ -7,7 +7,6 @@ import com.raifernando.util.PropertiesFile;
 import com.raifernando.util.QueryGenerator;
 import com.raifernando.util.Request;
 
-import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
@@ -20,12 +19,16 @@ public class OAuth {
     public static String accessToken;
     private static String refreshToken;
 
+    // Single instance for getting and storing credentials.
+    private static final PropertiesFile propertiesFile = new PropertiesFile();
+
     /**
      * Get the access code for the authenticated user. The code is stored in this class field.
      * @throws Exception
      */
     public static void getAccessCode() throws Exception {
-        accessToken = PropertiesFile.getFromFile("USER_ACCESS_CODE");
+        accessToken = propertiesFile.get("USER_ACCESS_CODE");
+
         if (Credentials.isTokenExpired("USER_ACCESS_CODE_TIME", 60))
             refreshAccessToken();
 
@@ -62,7 +65,7 @@ public class OAuth {
             accessToken = json.get("access_token").getAsString();
             refreshToken = json.get("refresh_token").getAsString();
             saveUserAccessCode();
-        } catch (NullPointerException | IOException e) {
+        } catch (NullPointerException e) {
             System.out.println("Error getting the user's access token");
         }
     }
@@ -85,12 +88,10 @@ public class OAuth {
 
     /**
      * Send a request to refresh the stored access token.
-     * @throws IOException
-     * @throws InterruptedException
      */
-    private static void refreshAccessToken() throws IOException, InterruptedException {
+    private static void refreshAccessToken() {
         System.out.println("Refreshing access token.");
-        refreshToken = PropertiesFile.getFromFile("REFRESH_TOKEN");
+        refreshToken = propertiesFile.get("REFRESH_TOKEN");
 
         Map<String, String> body = Map.of(
                 "grant_type", "refresh_token",
@@ -117,15 +118,19 @@ public class OAuth {
         }
     }
 
-    private static void saveUserAccessCode() throws IOException {
-        PropertiesFile.storeInFile("USER_ACCESS_CODE", accessToken);
-        PropertiesFile.storeInFile("USER_ACCESS_CODE_TIME", LocalDateTime.now().toString());
-        PropertiesFile.storeInFile("REFRESH_TOKEN", refreshToken);
+    private static void saveUserAccessCode() {
+        propertiesFile.store(Map.of(
+                "USER_ACCESS_CODE", accessToken,
+                "USER_ACCESS_CODE_TIME", LocalDateTime.now().toString(),
+                "REFRESH_TOKEN", refreshToken
+        ));
     }
 
-    private static void saveAuthorizationCode() throws IOException {
-        PropertiesFile.storeInFile("AUTHORIZATION_CODE", authCode);
-        PropertiesFile.storeInFile("AUTHORIZATION_CODE_TIME", LocalDateTime.now().toString());
+    private static void saveAuthorizationCode() {
+        propertiesFile.store(Map.of(
+                "AUTHORIZATION_CODE", authCode,
+                "AUTHORIZATION_CODE_TIME", LocalDateTime.now().toString()
+        ));
     }
 
     /**

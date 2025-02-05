@@ -1,80 +1,88 @@
 package com.raifernando.util;
 
 import java.io.*;
+import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Manage the {@code .properties} file with the necessary credentials for this app to work properly.
+ */
 public class PropertiesFile {
-    public static Properties properties = new Properties();
-    private static FileInputStream fileInput = null;
-    private static FileOutputStream fileOutput = null;
-    private static String FILE_NAME;
+    private final Properties properties = new Properties();
+    private final String filename;
 
-    public PropertiesFile(String fileName) {
-        FILE_NAME = fileName;
+    /**
+     * Create a new instance using the default file {@code (config.properties)}.
+     */
+    public PropertiesFile() {
+        this("config.properties"); // Default filename
     }
 
-    public static void setFileName(String fileName) {
-        FILE_NAME = fileName;
-    }
-
-    private static void loadProperties() {
-        if (fileInput == null) {
-            try {
-                fileInput = new FileInputStream(FILE_NAME);
-            } catch (FileNotFoundException e) {
-                System.out.println(FILE_NAME + "not found.");
-                return;
-            }
-
-            try {
-                properties.load(fileInput);
-            } catch (IOException e) {
-                System.out.println("Error loading file");
-            }
-        }
-    }
-
-    public static String getFromFile(String key) {
+    /**
+     * Create new instance using a custom {@code .properties} file.
+     * If changed from the default file {@code (config.properties)},
+     * it is necessary to update the Makefile for this project to build correctly.
+     * @param filename custom filename.
+     */
+    public PropertiesFile(String filename) {
+        this.filename = filename;
         loadProperties();
-
-        String property = properties.getProperty(key);
-        return (property.isEmpty() ? null : property);
     }
 
-    public static void storeInFile(String key, String value) throws IOException {
-        loadProperties();
-
-        if (fileOutput == null) {
-            try {
-                fileOutput = new FileOutputStream(FILE_NAME);
-            } catch (FileNotFoundException e) {
-                System.out.println(FILE_NAME + "not found.");
-                return;
-            }
-        }
-
-        properties.setProperty(key, value);
-        try {
-            properties.store(fileOutput, null);
+    /**
+     * Load the content from the property file.
+     */
+    private void loadProperties() {
+        try (FileInputStream fileInput = new FileInputStream(filename)) {
+            properties.load(fileInput);
+        } catch (FileNotFoundException e) {
+            System.out.println(filename + " not found.");
         } catch (IOException e) {
-            System.out.println("Error writing in file");
-        }
-        PropertiesFile.closeFiles();
-    }
-
-    public static void closeFiles() throws IOException {
-        if (fileInput != null) {
-            fileInput.close();
-            fileInput = null;
-        }
-
-        if (fileOutput != null) {
-            fileOutput.close();
-            fileOutput = null;
+            System.out.println("Error loading " + filename);
         }
     }
 
-    public static String getFileName() {
-        return FILE_NAME;
+    /**
+     * Get the property value from the key in the properties file.
+     * @param key key for the property
+     * @return the value, or null if not found
+     */
+    public String get(String key) {
+        String property = properties.getProperty(key);
+        return (property == null || property.isEmpty() ? null : property);
+    }
+
+    /**
+     * Store the value in the specified key
+     * @param key key to store the value
+     * @param value value to be stored
+     */
+    public void store(String key, String value) {
+        store(Map.of(key, value));
+    }
+
+    /**
+     * Store the values of the specified keys in the {@link Map}.
+     * @param listOfProperties map with the list of key-values pairs.
+     */
+    public void store(Map<String, String> listOfProperties) {
+        for (Map.Entry<String, String> entry : listOfProperties.entrySet()) {
+            properties.setProperty(entry.getKey(), entry.getValue());
+        }
+
+        try (FileOutputStream fileOutput = new FileOutputStream(filename)){
+            properties.store(fileOutput, null);
+        } catch (FileNotFoundException e) {
+            System.out.println(filename + " not found.");
+        } catch (IOException e) {
+            System.out.println("Error writing in " + filename);
+        }
+    }
+
+    /**
+     * @return the properties' filename.
+     */
+    public String getFileName() {
+        return filename;
     }
 }

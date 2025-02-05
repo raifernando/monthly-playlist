@@ -35,8 +35,10 @@ public class LastfmUser {
     public void setUser(String [] args) {
         if (args.length == 3)
             user = args[0];
-        else
-            user = PropertiesFile.getFromFile("LASTFM_USER");
+        else {
+            PropertiesFile propertiesFile = new PropertiesFile();
+            user = propertiesFile.get("LASTFM_USER");
+        }
 
         if (user == null || user.isEmpty())
             throw new InvalidParameterException();

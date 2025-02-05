@@ -2,7 +2,6 @@ package com.raifernando.util;
 
 import com.google.gson.JsonObject;
 
-import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
@@ -14,25 +13,29 @@ public class Credentials {
 
     public static String lastfmApiKey;
 
-    public static void loadKeys() throws IOException, InterruptedException, NullPointerException {
-        spotifyClientId = PropertiesFile.getFromFile("CLIENT_ID");
-        spotifyClientSecret = PropertiesFile.getFromFile("CLIENT_SECRET");
-        spotifyAccessToken = PropertiesFile.getFromFile("ACCESS_TOKEN");
-        lastfmApiKey = PropertiesFile.getFromFile("API_KEY");
+    private static final PropertiesFile propertiesFile = new PropertiesFile();
+
+    public static void loadKeys() throws NullPointerException {
+        spotifyClientId = propertiesFile.get("CLIENT_ID");
+        spotifyClientSecret = propertiesFile.get("CLIENT_SECRET");
+        spotifyAccessToken = propertiesFile.get("ACCESS_TOKEN");
+        lastfmApiKey = propertiesFile.get("API_KEY");
 
         if (spotifyClientId == null || spotifyClientSecret == null || lastfmApiKey == null)
-            throw new NullPointerException("Credentials in the " + PropertiesFile.getFileName() + " file are missing.");
+            throw new NullPointerException("Credentials in the " + propertiesFile.getFileName() + " file are missing.");
 
         if (spotifyAccessToken == null || isTokenExpired("ACCESS_TOKEN_TIME", 60))
             getAccessToken();
     }
 
-    private static void saveAccessToken(String token) throws IOException {
-        PropertiesFile.storeInFile("ACCESS_TOKEN", token);
-        PropertiesFile.storeInFile("ACCESS_TOKEN_TIME", LocalDateTime.now().toString());
+    private static void saveAccessToken() {
+        propertiesFile.store(Map.of(
+                "ACCESS_TOKEN", spotifyAccessToken,
+                "ACCESS_TOKEN_TIME", LocalDateTime.now().toString()
+        ));
     }
 
-    public static void getAccessToken() throws IOException, InterruptedException {
+    public static void getAccessToken() {
         System.out.println("Requested new access token.");
 
         Map<String, String> body = Map.of(
@@ -48,7 +51,7 @@ public class Credentials {
                 JsonObject.class);
 
         spotifyAccessToken = jsonObject.get("access_token").getAsString();
-        saveAccessToken(spotifyAccessToken);
+        saveAccessToken();
     }
 
     /**
@@ -59,7 +62,7 @@ public class Credentials {
      */
     public static boolean isTokenExpired(String keyOfStoredTime, int minutes) {
         try {
-            String storedTime = PropertiesFile.getFromFile(keyOfStoredTime);
+            String storedTime = propertiesFile.get(keyOfStoredTime);
             if (storedTime != null) {
                 LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(minutes);
                 return LocalDateTime.parse(storedTime).isBefore(expirationTime);
