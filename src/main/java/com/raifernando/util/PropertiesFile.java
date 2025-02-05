@@ -17,28 +17,33 @@ public class PropertiesFile {
         FILE_NAME = fileName;
     }
 
-    public static String getFromFile(String key) {
+    private static void loadProperties() {
         if (fileInput == null) {
             try {
                 fileInput = new FileInputStream(FILE_NAME);
             } catch (FileNotFoundException e) {
                 System.out.println(FILE_NAME + "not found.");
-                return null;
+                return;
             }
 
             try {
                 properties.load(fileInput);
             } catch (IOException e) {
                 System.out.println("Error loading file");
-                return null;
             }
         }
+    }
+
+    public static String getFromFile(String key) {
+        loadProperties();
 
         String property = properties.getProperty(key);
         return (property.isEmpty() ? null : property);
     }
 
     public static void storeInFile(String key, String value) throws IOException {
+        loadProperties();
+
         if (fileOutput == null) {
             try {
                 fileOutput = new FileOutputStream(FILE_NAME);
