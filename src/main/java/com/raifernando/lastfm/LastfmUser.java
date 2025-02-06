@@ -24,6 +24,15 @@ public class LastfmUser {
         this.user = user;
     }
 
+    /**
+     * Set the user from the first argument in the list, or retrieve it from the properties file.
+     * @param args argument list
+     * @throws InvalidParameterException if the user is invalid
+     */
+    public LastfmUser(String [] args) {
+        setUser(args);
+    }
+
     public String getUser() {
         return user;
     }
@@ -32,6 +41,11 @@ public class LastfmUser {
         this.user = user;
     }
 
+    /**
+     * If there are three arguments, get the username from the list of arguments; otherwise, retrieve it from the properties file.
+     * If the user is invalid, throws {@link InvalidParameterException}.
+     * @param args argument list
+     */
     public void setUser(String [] args) {
         if (args.length == 3)
             user = args[0];
@@ -41,7 +55,7 @@ public class LastfmUser {
         }
 
         if (user == null || user.isEmpty())
-            throw new InvalidParameterException();
+            throw new InvalidParameterException("Invalid lastfm user");
     }
 
     public ArrayList<LastfmTrack> getTopTracks() {
@@ -123,7 +137,7 @@ public class LastfmUser {
 
         topTracks.sort(( (a, b) -> { return -1 * compare(a.getPlaycount(), b.getPlaycount()); } ));
 
-        int arraySize = min;
+        int arraySize = (min == 0)   ? 1 : min;
         if (playcountPerTrack != 0) {
             for (; arraySize < topTracks.size(); arraySize++) {
                 if (playcountPerTrack > topTracks.get(arraySize - 1).getPlaycount())

@@ -1,6 +1,7 @@
 package com.raifernando.util;
 
 import com.google.gson.JsonObject;
+import com.raifernando.spotify.OAuth;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -15,7 +16,7 @@ public class Credentials {
 
     private static final PropertiesFile propertiesFile = new PropertiesFile();
 
-    public static void loadKeys() throws NullPointerException {
+    public static void loadKeys() throws Exception {
         spotifyClientId = propertiesFile.get("CLIENT_ID");
         spotifyClientSecret = propertiesFile.get("CLIENT_SECRET");
         spotifyAccessToken = propertiesFile.get("ACCESS_TOKEN");
@@ -26,6 +27,8 @@ public class Credentials {
 
         if (spotifyAccessToken == null || isTokenExpired("ACCESS_TOKEN_TIME", 60))
             getAccessToken();
+
+        OAuth.getAccessCode();
     }
 
     private static void saveAccessToken() {

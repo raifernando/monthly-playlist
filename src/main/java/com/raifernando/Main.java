@@ -6,46 +6,23 @@ import com.raifernando.spotify.*;
 import com.raifernando.util.Credentials;
 import com.raifernando.util.DateRange;
 
-import java.security.InvalidParameterException;
-import java.text.ParseException;
 import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        if (args.length == 0) {
-            System.out.println("Date for request not provided.");
-            System.exit(0);
-        }
+        if (args.length < 2 || args.length > 3)
+            throw new IllegalArgumentException("Invalid argument. Valid arguments: [LastfmUser] MMM YYYY");
 
-        // Setup api credentials
-        try {
-            Credentials.loadKeys();
-        } catch (NullPointerException e) {
-            System.out.println(e.getMessage());
-            System.exit(0);
-        }
+        // Set LastfmUser and date for request
+        LastfmUser user = new LastfmUser(args);
+        DateRange dateRange = new DateRange(args);
 
-        LastfmUser user = new LastfmUser();
-        try {
-            user.setUser(args);
-        } catch (InvalidParameterException e) {
-            System.out.println("Invalid lastfm username");
-            System.exit(0);
-        }
+        // Load api keys
+        Credentials.loadKeys();
 
-        // Date for lastfm history
-        DateRange dateRange = new DateRange();
-        try {
-            dateRange.setDate(args);
-        } catch (ParseException e) {
-            System.out.printf("Invalid month [%s].", e.getMessage());
-            System.exit(0);
-        }
-
-        OAuth.getAccessCode();
-
+        // Get tracks
         ArrayList<LastfmTrack> tracks = user.getRecentTracks(dateRange);
-        tracks = user.getUserTopTracks(tracks, 0, 3, 0);
+        tracks = user.getUserTopTracks(tracks, 0, 0, 3);
 
         SpotifyUser spotifyUser = SpotifyUser.getCurrentUser();
         SpotifyPlaylist playlist = SpotifyPlaylist.createPlaylist(spotifyUser, dateRange.getDateAsString());
