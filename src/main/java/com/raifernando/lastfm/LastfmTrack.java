@@ -1,15 +1,12 @@
 package com.raifernando.lastfm;
 
+import java.util.ArrayList;
+
 public class LastfmTrack {
     private String name;
     private LastfmArtist artist;
     private LastfmAlbum album;
     private transient int playcount;
-
-    private Date date;
-    private static class Date {
-        private String uts;
-    }
 
     public String getName() {
         return name;
@@ -31,12 +28,24 @@ public class LastfmTrack {
         playcount += x;
     }
 
-    public String getDate() {
-        return date.uts;
-    }
-
     public LastfmAlbum getAlbum() {
         return album;
+    }
+
+    /**
+     * Print every track information (name, artist and playcount) for each track in the array.
+     * @param tracks array of tracks
+     */
+    public static void printTracksInformation(ArrayList<LastfmTrack> tracks) {
+        if (tracks == null)
+            return;
+
+        System.out.printf("%d tracks selected:\n", tracks.size());
+        for (LastfmTrack track : tracks) {
+            System.out.printf(">>> %s - %s | %d scrobbles\n",
+                    track.getName(), track.getArtist().getName(), track.getPlaycount()
+            );
+        }
     }
 
     @Override

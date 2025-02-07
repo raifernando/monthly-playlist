@@ -47,8 +47,6 @@ public class SpotifyPlaylist {
         if (track == null)
             return;
 
-        System.out.println("Adding " + track.getName() + " - " + track.getArtistName());
-
         JsonObject jsonBody = new JsonObject();
         JsonArray jsonArray = new JsonArray();
         jsonArray.add(track.getUri());
@@ -72,6 +70,7 @@ public class SpotifyPlaylist {
     }
 
     public void addMultipleTracks(SpotifyPlaylist playlist, ArrayList<LastfmTrack> tracks) throws IOException, InterruptedException {
+        LastfmTrack.printTracksInformation(tracks);
         System.out.println("Adding tracks to playlist");
 
         JsonArray jsonArray = new JsonArray();
@@ -104,6 +103,8 @@ public class SpotifyPlaylist {
     }
 
     public void addTracks(SpotifyPlaylist playlist, ArrayList<LastfmTrack> tracks) throws IOException, InterruptedException {
+        LastfmTrack.printTracksInformation(tracks);
+
         for (LastfmTrack track : tracks) {
             SpotifyTrack spotifyTrack = SpotifyTrack.searchForTrack(track.getName(), track.getArtist().getName(), track.getAlbum().getName());
             playlist.addTrack(spotifyTrack);
