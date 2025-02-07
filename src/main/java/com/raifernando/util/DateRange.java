@@ -91,4 +91,26 @@ public class DateRange {
     public long getEndDate() {
         return endDate;
     }
+
+    /**
+     * Returns a {@link String} in the format YYYY-MM-DD:YYYY-MM-DD of the date range.
+     * @return the string
+     */
+    public String getFullRange() {
+        // The endDate is the start of the next month. Subtracting 1 day gets the last day of the current month.
+        long startEpochDay = startDate / 86400, endEpochDay = (endDate / 86400) - 1;
+        String firstDay = String.format("%d-%02d-%02d",
+                LocalDate.ofEpochDay(startEpochDay).getYear(),
+                LocalDate.ofEpochDay(startEpochDay).getMonthValue(),
+                LocalDate.ofEpochDay(startEpochDay).getDayOfMonth()
+        );
+
+        String lastDay = String.format("%d-%02d-%02d",
+                LocalDate.ofEpochDay(endEpochDay).getYear(),
+                LocalDate.ofEpochDay(endEpochDay).getMonthValue(),
+                LocalDate.ofEpochDay(endEpochDay).getDayOfMonth()
+        );
+
+        return firstDay + ":" + lastDay;
+    }
 }
