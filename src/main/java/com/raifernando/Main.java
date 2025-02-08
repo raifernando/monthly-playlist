@@ -22,11 +22,12 @@ public class Main {
 
         // Get tracks
         ArrayList<LastfmTrack> tracks = user.getRecentTracks(dateRange);
-        tracks = user.getUserTopTracks(tracks, 0, 0, 3);
+        tracks = user.getUserTopTracks(tracks, 10, 7);
 
         SpotifyUser spotifyUser = SpotifyUser.getCurrentUser();
-        SpotifyPlaylist playlist = SpotifyPlaylist.createPlaylist(spotifyUser, dateRange.getDateAsString());
+        SpotifyPlaylist playlist = new SpotifyPlaylist(spotifyUser, dateRange.getDateAsString());
 
-        playlist.addMultipleTracks(playlist, tracks);
+
+        playlist.addMultipleTracks(tracks);
     }
 }
