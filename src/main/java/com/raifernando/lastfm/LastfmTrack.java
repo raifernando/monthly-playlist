@@ -47,12 +47,4 @@ public class LastfmTrack {
             );
         }
     }
-
-    @Override
-    public String toString() {
-        return "LastfmTrack{" +
-                ", name='" + name + '\'' +
-                ", artist=" + artist.getName() +
-                '}';
-    }
 }

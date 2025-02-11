@@ -10,30 +10,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Map;
 
 public class SpotifyTrack {
     private String id;
-    private SpotifyAlbum album;
-    private ArrayList<SpotifyArtist> artists;
     private String name;
-    private int popularity;
-    private int track_number;
     private String uri;
-
-    public static SpotifyTrack getTrack(String trackId) {
-        String requestUrl = "https://api.spotify.com/v1/tracks/" + trackId;
-
-        SpotifyTrack track = Request.get(
-                requestUrl,
-                new String[] {"Authorization", "Bearer " + Credentials.spotifyAccessToken},
-                SpotifyTrack.class
-        );
-
-        System.out.println(track.toString());
-        return track;
-    }
 
     /**
      * Searches for one track using its name, artist, and album.
@@ -119,32 +101,7 @@ public class SpotifyTrack {
                 "&" + QueryGenerator.generateQueryString(map);
     }
 
-    public ArrayList<SpotifyArtist> getArtists() {
-        return artists;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getArtistName() {
-        return artists.getFirst().getName();
-    }
-
     public String getUri() {
         return uri;
-    }
-
-    @Override
-    public String toString() {
-        return "Track{" +
-                "id='" + id + '\'' +
-                ", album=" + album +
-                ", artists=" + artists +
-                ", name='" + name + '\'' +
-                ", popularity=" + popularity +
-                ", track_number=" + track_number +
-                ", uri=" + uri +
-                '}';
     }
 }

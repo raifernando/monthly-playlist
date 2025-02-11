@@ -81,9 +81,4 @@ public class Credentials {
         }
         return false;
     }
-
-    @Override
-    public String toString() {
-        return "SpotifyClientId:" + spotifyClientId + "\nspotifyClientSecret:" + spotifyClientSecret + "\nspotifyAccessToken:" + spotifyAccessToken;
-    }
 }
