@@ -16,7 +16,7 @@ public class Credentials {
 
     private static final PropertiesFile propertiesFile = new PropertiesFile();
 
-    public static void loadKeys() throws Exception {
+    public static void loadKeys() {
         spotifyClientId = propertiesFile.get("CLIENT_ID");
         spotifyClientSecret = propertiesFile.get("CLIENT_SECRET");
         spotifyAccessToken = propertiesFile.get("ACCESS_TOKEN");

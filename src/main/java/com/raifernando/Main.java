@@ -9,7 +9,7 @@ import com.raifernando.util.DateRange;
 import java.util.ArrayList;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         if (args.length < 2 || args.length > 3)
             throw new IllegalArgumentException("Invalid argument. Valid arguments: [LastfmUser] MMM YYYY");
 
@@ -22,11 +22,10 @@ public class Main {
 
         // Get tracks
         ArrayList<LastfmTrack> tracks = user.getRecentTracks(dateRange);
-        tracks = user.getUserTopTracks(tracks, 10, 7);
+        tracks = user.getUserTopTracks(tracks, 10, 3);
 
         SpotifyUser spotifyUser = SpotifyUser.getCurrentUser();
         SpotifyPlaylist playlist = new SpotifyPlaylist(spotifyUser, dateRange.getDateAsString());
-
 
         playlist.addMultipleTracks(tracks);
     }

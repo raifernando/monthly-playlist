@@ -7,6 +7,7 @@ import com.raifernando.util.PropertiesFile;
 import com.raifernando.util.QueryGenerator;
 import com.raifernando.util.Request;
 
+import java.rmi.ServerException;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
@@ -24,9 +25,8 @@ public class OAuth {
 
     /**
      * Get the access code for the authenticated user. The code is stored in this class field.
-     * @throws Exception
      */
-    public static void getAccessCode() throws Exception {
+    public static void getAccessCode() {
         accessToken = propertiesFile.get("USER_ACCESS_CODE");
 
         if (Credentials.isTokenExpired("USER_ACCESS_CODE_TIME", 60))
@@ -38,9 +38,8 @@ public class OAuth {
 
     /**
      * Request a new access token for the current user, using the authorization code.
-     * @throws Exception
      */
-    private static void requestAccessToken() throws Exception {
+    private static void requestAccessToken() {
         requestAuthorizationCode();
 
         Map<String, String> body = Map.of(
@@ -73,17 +72,18 @@ public class OAuth {
 
     /**
      * Create a local server to authenticate the user and get the authorization code.
-     * @throws Exception
      */
-    private static void requestAuthorizationCode() throws Exception {
-        AuthCodeReceiver.startServer();
+    private static void requestAuthorizationCode()  {
+        try {
+            AuthCodeReceiver.startServer();
+            System.out.println("Authenticate in: " + spotifyLoginUrl());
 
-        System.out.println(spotifyLoginUrl());
-
-        latch.await();
+            latch.await();
+        } catch (InterruptedException | ServerException e) {
+            throw new RuntimeException(e);
+        }
 
         AuthCodeReceiver.stopServer();
-
         saveAuthorizationCode();
     }
 
