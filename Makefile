@@ -7,7 +7,7 @@ all:
 
 createfile:
 	@touch $(API_KEYS_FILE)
-	@echo "API_KEY=\nCLIENT_ID=\nCLIENT_SECRET=" >> $(API_KEYS_FILE)
+	@echo "API_KEY=\nCLIENT_ID=\nCLIENT_SECRET=\nLASTFM_USER=" >> $(API_KEYS_FILE)
 
 signout:
 	@java -cp target/monthly-playlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.raifernando.spotify.SignOut
