@@ -54,20 +54,21 @@ public class OAuth {
                 "Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.spotifyClientId + ":" + Credentials.spotifyClientSecret).getBytes())
         };
 
-        JsonObject json = Request.requestPost(
+        JsonObject response = Request.post(
                 "https://accounts.spotify.com/api/token",
                 body,
                 headers,
                 JsonObject.class
         );
 
-        try {
-            accessToken = json.get("access_token").getAsString();
-            refreshToken = json.get("refresh_token").getAsString();
-            saveUserAccessCode();
-        } catch (NullPointerException e) {
+        if (response == null || !response.has("access_token") || !response.has("refresh_token")) {
             System.out.println("Error getting the user's access token");
+            return;
         }
+
+        accessToken = response.get("access_token").getAsString();
+        refreshToken = response.get("refresh_token").getAsString();
+        saveUserAccessCode();
     }
 
     /**
@@ -103,19 +104,20 @@ public class OAuth {
                 "Authorization", "Basic " + Base64.getEncoder().encodeToString((Credentials.spotifyClientId + ":" + Credentials.spotifyClientSecret).getBytes())
         };
 
-        JsonObject json = Request.requestPost(
+        JsonObject response = Request.post(
                 "https://accounts.spotify.com/api/token",
                 body,
                 headers,
                 JsonObject.class
         );
 
-        try {
-            accessToken = json.get("access_token").getAsString();
-            saveUserAccessCode();
-        } catch (NullPointerException e) {
+        if (response == null || !response.has("access_token")) {
             System.out.println("Error refreshing access token");
+            return;
         }
+
+        accessToken = response.get("access_token").getAsString();
+        saveUserAccessCode();
     }
 
     private static void saveUserAccessCode() {

@@ -94,7 +94,7 @@ public class LastfmUser {
         int currentPage = 1, totalPages = 1;
         do {
             // The expected response from the API is in this format: {"recenttracks": {"track":[...], "@attr":{...}}}
-            JsonObject scrobbles = Request.requestGetNoHeader(url + "&page=" + currentPage, JsonObject.class);
+            JsonObject scrobbles = Request.getNoHeader(url + "&page=" + currentPage, JsonObject.class);
 
             if (scrobbles == null) {
                 System.err.printf("Failed to retrieve data for page %d.%n", currentPage);

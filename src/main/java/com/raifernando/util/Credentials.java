@@ -47,13 +47,18 @@ public class Credentials {
                 "client_secret", spotifyClientSecret
         );
 
-        JsonObject jsonObject = Request.requestPost(
+        JsonObject response = Request.post(
                 "https://accounts.spotify.com/api/token",
                 body,
                 new String[] {"Content-Type", "application/x-www-form-urlencoded"},
                 JsonObject.class);
 
-        spotifyAccessToken = jsonObject.get("access_token").getAsString();
+        if (response == null) {
+            System.out.println("Failed to get new access token.");
+            return;
+        }
+
+        spotifyAccessToken = response.get("access_token").getAsString();
         saveAccessToken();
     }
 

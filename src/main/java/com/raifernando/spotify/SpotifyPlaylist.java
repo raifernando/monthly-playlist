@@ -5,8 +5,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.raifernando.lastfm.LastfmTrack;
 import com.raifernando.util.Request;
+import org.jetbrains.annotations.Nullable;
 
-import javax.ws.rs.BadRequestException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,20 +28,18 @@ public class SpotifyPlaylist {
      * Creates an instance of {@link SpotifyPlaylist} creating a new Spotify Playlist with custom name.
      * @param user {@link SpotifyUser} where the playlist is created
      * @param name the playlist name
-     * @throws BadRequestException if it fails to create the playlist
      * @throws NullPointerException if the ID of the created playlist is {@code null}
      */
-    public SpotifyPlaylist(SpotifyUser user, String name) throws BadRequestException, NullPointerException {
+    public SpotifyPlaylist(SpotifyUser user, String name) throws NullPointerException {
         this(createPlaylist(user, name));
     }
 
     /**
      * Creates an instance of {@link SpotifyPlaylist} creating a new Spotify Playlist with the default name.
      * @param user {@link SpotifyUser} where the playlist is created
-     * @throws BadRequestException if it fails to create the playlist
      * @throws NullPointerException if the ID of the created playlist is {@code null}
      */
-    public SpotifyPlaylist(SpotifyUser user) throws BadRequestException, NullPointerException {
+    public SpotifyPlaylist(SpotifyUser user) throws NullPointerException {
         this(createPlaylist(user));
     }
 
@@ -50,10 +48,11 @@ public class SpotifyPlaylist {
      * The playlist has a custom {@code name}.
      * @param user {@link SpotifyUser} in whose account the playlist is created
      * @param name the name of the new playlist
-     * @return a {@link String} containing the ID of the created playlist
-     * @throws BadRequestException if the API request fails to create the playlist
+     * @return a {@link String} containing the ID of the created playlist,
+     * or {@code null} if an error occurred while creating the playlist.
      */
-    private static String createPlaylist(SpotifyUser user, String name) throws BadRequestException{
+    @Nullable
+    private static String createPlaylist(SpotifyUser user, String name) {
         if (OAuth.accessToken == null || user.getId() == null) {
             System.out.println("User not authenticated. Failed to create playlist.");
             return null;
@@ -69,15 +68,17 @@ public class SpotifyPlaylist {
                 "Authorization", "Bearer " + OAuth.accessToken
         };
 
-        SpotifyPlaylist response = Request.requestPost(
+        SpotifyPlaylist response = Request.post(
                 "https://api.spotify.com/v1/users/" + user.getId() + "/playlists",
                 jsonBody.toString(),
                 headers,
                 SpotifyPlaylist.class
         );
 
-        if (response == null)
-            throw new BadRequestException("Error creating playlist.");
+        if (response == null) {
+            System.out.println("Failed to create the playlist.");
+            return null;
+        }
 
         return response.id;
     }
@@ -86,10 +87,10 @@ public class SpotifyPlaylist {
      * Creates a new playlist in the {@code user}'s Spotify account using the API.
      * The playlist has the default name "monthly-playlist".
      * @param user {@link SpotifyUser} in whose account the playlist is created
-     * @return a {@link String} containing the ID of the created playlist
-     * @throws BadRequestException if the API request fails to create the playlist
+     * @return a {@link String} containing the ID of the created playlist,
+     * or {@code null} if the API request fails to create the playlist
      */
-    private static String createPlaylist(SpotifyUser user) throws BadRequestException{
+    private static String createPlaylist(SpotifyUser user) {
         return createPlaylist(user, "monthly-playlist");
     }
 
@@ -109,7 +110,7 @@ public class SpotifyPlaylist {
                 "Authorization", "Bearer " + OAuth.accessToken
         };
 
-        SpotifyPlaylist response = Request.requestPost(
+        SpotifyPlaylist response = Request.post(
                 "https://api.spotify.com/v1/playlists/" + id + "/tracks",
                 uris,
                 headers,
@@ -121,7 +122,7 @@ public class SpotifyPlaylist {
 
     /**
      * Generates a {@link String} containing the list of URIs used to add tracks into the playlist.
-     * The {@link String} follows this format: {"uris":[..., ...]}
+     * The {@link String} follows this format: {"uris": [..., ...]}
      * @param trackList a list of {@link SpotifyTrack} used to retrieve the track's URI
      * @return a {@link String} containing the list of URIs
      */
@@ -150,7 +151,8 @@ public class SpotifyPlaylist {
         List<SpotifyTrack> tracklist = new ArrayList<>();
         for (LastfmTrack track : tracks) {
             SpotifyTrack spotifyTrack = SpotifyTrack.searchForTrack(track.getName(), track.getArtist().getName(), track.getAlbum().getName());
-            tracklist.add(spotifyTrack);
+            if (spotifyTrack != null)
+                tracklist.add(spotifyTrack);
         }
 
         // A maximum of 100 items can be added in one request.

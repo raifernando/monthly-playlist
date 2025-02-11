@@ -25,7 +25,7 @@ public class SpotifyTrack {
     public static SpotifyTrack getTrack(String trackId) {
         String requestUrl = "https://api.spotify.com/v1/tracks/" + trackId;
 
-        SpotifyTrack track = Request.requestGet(
+        SpotifyTrack track = Request.get(
                 requestUrl,
                 new String[] {"Authorization", "Bearer " + Credentials.spotifyAccessToken},
                 SpotifyTrack.class
@@ -44,6 +44,7 @@ public class SpotifyTrack {
      * @param albumName the name of the album
      * @return a {@link SpotifyTrack} or {@code null} if the track wasn't found
      */
+    @Nullable
     public static SpotifyTrack searchForTrack(String trackName, String artistName, String albumName) {
         // Searches with all three parameters
         SpotifyTrack track = searchForTrack(getTrackSearchUrl(trackName, artistName, albumName));
@@ -64,21 +65,32 @@ public class SpotifyTrack {
     /**
      * Searches for one track using the API URL.
      * @param url the URL to send the request
-     * @return a {@link SpotifyTrack} or {@code null} if the track an error occurred
+     * @return a {@link SpotifyTrack} or {@code null} if the track search fails
      */
+    @Nullable
     private static SpotifyTrack searchForTrack(String url) {
         Gson gson = new Gson();
 
         try {
-            JsonObject jsonObject = Request.requestGet(
+            JsonObject response = Request.get(
                     url,
                     new String[] {"Authorization", "Bearer " + Credentials.spotifyAccessToken},
                     JsonObject.class
-            ).getAsJsonObject("tracks");
+            );
 
+            if (response == null || !response.has("tracks"))
+                return null;
+
+            JsonObject jsonObject = response.getAsJsonObject("tracks");
             JsonArray jsonArray = jsonObject.getAsJsonArray("items");
+
+            if (jsonArray == null || jsonArray.isEmpty())
+                return null;
+
+            // Get the first track from the response
             return gson.fromJson(jsonArray.get(0).getAsJsonObject(), SpotifyTrack.class);
         } catch (Exception _) {
+            // Error searching for the track.
             return null;
         }
     }

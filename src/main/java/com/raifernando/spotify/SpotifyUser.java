@@ -6,10 +6,17 @@ public class SpotifyUser {
     private String id = null;
 
     public static SpotifyUser getCurrentUser() {
-        return Request.requestGet(
+        System.out.println("Requesting current user's information.");
+
+        SpotifyUser response = Request.get(
                 "https://api.spotify.com/v1/me",
                 new String[] {"Authorization", "Bearer " + OAuth.accessToken},
                 SpotifyUser.class);
+
+        if (response == null)
+            System.out.println("Failed to get current user.");
+
+        return response;
     }
 
     public String getId() {
