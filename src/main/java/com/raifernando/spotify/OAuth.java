@@ -15,6 +15,8 @@ import java.util.concurrent.CountDownLatch;
 
 public class OAuth {
     public static String authCode;
+
+    // Latch to wait for the retrieve of the authorization code in the AuthCodeReceiver class.
     public static CountDownLatch latch = new CountDownLatch(1);
 
     public static String accessToken;
@@ -78,6 +80,7 @@ public class OAuth {
             AuthCodeReceiver.startServer();
             System.out.println("Authenticate in: " + spotifyLoginUrl());
 
+            // Wait until the authorization code is retrieved
             latch.await();
         } catch (InterruptedException | ServerException e) {
             throw new RuntimeException(e);
