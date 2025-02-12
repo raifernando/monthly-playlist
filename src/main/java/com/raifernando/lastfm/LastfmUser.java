@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import static java.lang.Integer.compare;
 
 /**
- * This class contains methods used to retrieve information about the user.
+ * The {@link LastfmUser} class is responsible to retrieve data of the Last.fm user's account.
+ * For this project, the available operation is to get the recent tracks scrobbled within a certain period of time.
  */
 public class LastfmUser {
     // Lastfm username used for API calls
@@ -32,7 +33,7 @@ public class LastfmUser {
 
     /**
      * Create an instance using the provided String as username.
-     * @param user lastfm username
+     * @param user the last.fm username
      * @throws IllegalArgumentException if the user is invalid
      */
     public LastfmUser(String user) {
@@ -53,9 +54,9 @@ public class LastfmUser {
     }
 
     /**
-     * If there are three arguments, get the username from the first element from the list of arguments.
+     * If there are three arguments, retrieves the username from the first element in the list of arguments.
      * @param args argument list
-     * @return the username
+     * @return the username as a {@link String}.
      */
     private static String getUserFromArguments(String [] args) {
         if (args != null && args.length == 3)
@@ -65,8 +66,8 @@ public class LastfmUser {
     }
 
     /**
-     * Get the username stored in the properties file.
-     * @return the username
+     * Retrieve the username stored in the properties file.
+     * @return the username as a {@link String}.
      */
     private static String getUserFromProperties() {
         PropertiesFile propertiesFile = new PropertiesFile();
@@ -74,18 +75,18 @@ public class LastfmUser {
     }
 
     /**
-     * Get user's recent tracks based of a date range.
-     * @param dateRange data range for the request
-     * @return an array list with the tracks. can be null.
+     * Retrieves the user's recent tracks within a specified range.
+     * @param range data range for the request
+     * @return an array list with the tracks. Can be empty.
      */
-    public ArrayList<LastfmTrack> getRecentTracks(DateRange dateRange) {
+    public ArrayList<LastfmTrack> getRecentTracks(DateRange range) {
         System.out.printf("""
                 Requesting Lastfm data of %s.
                 Receiving scrobbles from %s.
-                """, user, dateRange.getFullRange());
+                """, user, range.getFullRange());
 
         String url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="
-                + user + "&from=" + dateRange.getStartDate() + "&to=" + dateRange.getEndDate() +"&limit=200"
+                + user + "&from=" + range.getStartDate() + "&to=" + range.getEndDate() +"&limit=200"
                 + "&api_key=" + Credentials.lastfmApiKey +"&format=json";
 
         Gson gson = new Gson();
@@ -132,25 +133,28 @@ public class LastfmUser {
     /**
      * Check whether the track response has a field "@attr", which means that the track is currently playing in Spotify
      * @param track track to check the status
-     * @return true if is playing, false if not
+     * @return {@code true} if is playing, {@code false} if not
      */
     private boolean isTrackNowPlaying(JsonElement track) {
-        return track.getAsJsonObject().get("@attr") != null;
+        return track.getAsJsonObject().has("@attr");
     }
 
     /**
-     * Select all tracks with playcount equals or higher than {@code playcountPerTrack}.
-     * If the track quantity is less than {@code min}, all subsequent tracks of the array are added.
+     * Selects all tracks with playcount greater than or equal to {@code playcountPerTrack}.
+     * If the number of selected tracks is lower than {@code min},
+     * subsequent tracks of the array are included until {@code min} is reached. <br>
+     * The returned array is sorted in descending order of playcount.
      * @param tracks array of tracks
      * @param min: minimum quantity of tracks
-     * @param playcountPerTrack value which all tracks with this playcount are added.
+     * @param playcountPerTrack value which all tracks with playcount greater or equal are added.
      * @return an arraylist of {@link LastfmTrack} with the tracks selected
      * @throws NullPointerException if the array of tracks is null.
-     * @throws IllegalArgumentException if min/playcount is 0. See {@link #getUserTracks(ArrayList)}.
+     * @throws IllegalArgumentException if min/playcount is 0.
+     * @see #getUserTracks(ArrayList)
      */
     public ArrayList<LastfmTrack> getUserTopTracks(ArrayList<LastfmTrack> tracks, int min, int playcountPerTrack) {
         if (tracks == null || tracks.isEmpty())
-            throw new NullPointerException("array of tracks is null.");
+            throw new NullPointerException("array of tracks is null/empty.");
 
         if (min == 0 || playcountPerTrack == 0)
             throw new IllegalArgumentException("min/playcount cannot be 0.");
@@ -187,7 +191,7 @@ public class LastfmUser {
     }
 
     /**
-     * Sort the array based on the track playcount.
+     * Sorts the array in descending order based on the track's playcount.
      * @param tracks array of tracks
      * @return a sorted arraylist of {@link LastfmTrack} with the all tracks selected
      * @throws NullPointerException if the array of tracks is null.
@@ -219,8 +223,8 @@ public class LastfmUser {
 }
 
 /**
- * Class containing the response information.
- * Every response from the user's request page contains a field "@attr",
+ * The {@link ResponseInformation} class contains the response information of the API request.
+ * Every response from the user's request page contains a field {@code "@attr"},
  * which stores information about the request: the username, the number
  * of pages from that request, the actual page and the total numbers of items.
  */

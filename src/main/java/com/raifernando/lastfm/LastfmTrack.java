@@ -2,11 +2,15 @@ package com.raifernando.lastfm;
 
 import java.util.ArrayList;
 
+/**
+ * The {@link LastfmTrack} class stores the track information
+ * retrieved from the JSON data returned by the Last.fm API response.
+ */
 public class LastfmTrack {
     private String name;
     private LastfmArtist artist;
     private LastfmAlbum album;
-    private transient int playcount;
+    private transient int playcount = 0;
 
     public String getName() {
         return name;
@@ -24,8 +28,8 @@ public class LastfmTrack {
         return name.compareTo(b.name);
     }
 
-    public void increasePlaycount(int x) {
-        playcount += x;
+    public void increasePlaycount(int increment) {
+        playcount += increment;
     }
 
     public LastfmAlbum getAlbum() {
@@ -33,7 +37,7 @@ public class LastfmTrack {
     }
 
     /**
-     * Print every track information (name, artist and playcount) for each track in the array.
+     * Prints every track information (name, artist and playcount) for each track in the array.
      * @param tracks array of tracks
      */
     public static void printTracksInformation(ArrayList<LastfmTrack> tracks) {
