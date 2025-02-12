@@ -38,21 +38,16 @@ import java.util.concurrent.CountDownLatch;
  *     the {@link PropertiesFile}.
  * </p>
  * <p>
- *     This class provides the following fields:
- *     <ul>
- *         <li>{@link #authCode}: the authorization code received from Spotify after user authentication.</li>
- *         <li>{@link #latch}: a {@link CountDownLatch} used to wait for the authorization code to be received.</li>
- *         <li>{@link #accessToken}: the access token used to make authenticated requests to the Spotify API.</li>
- *     </ul>
+ *     This class provides the {@link #accessToken} field that can be used in API requests.
  * </p>
  */
 public class OAuth {
-    public static String authCode;
-
-    public static CountDownLatch latch = new CountDownLatch(1);
-
+    private static String authCode;
     public static String accessToken;
     private static String refreshToken;
+
+    // A latch used to wait for the authorization code to be received.
+    private static final CountDownLatch latch = new CountDownLatch(1);
 
     // Single instance for getting and storing credentials.
     private static final PropertiesFile propertiesFile = new PropertiesFile();
@@ -197,5 +192,13 @@ public class OAuth {
         );
 
         return "https://accounts.spotify.com/authorize?" + QueryGenerator.generateQueryString(query);
+    }
+
+    public static void setAuthCode(String authCode) {
+        OAuth.authCode = authCode;
+    }
+
+    public static void countLatchDown() {
+        OAuth.latch.countDown();
     }
 }

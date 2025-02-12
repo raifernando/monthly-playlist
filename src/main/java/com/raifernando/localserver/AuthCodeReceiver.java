@@ -55,8 +55,8 @@ class CallbackHandler implements HttpHandler {
         code = code.substring(0, code.length() - 6); // Remove "&state" part
 
         // Signals to OAuth that the authorization code was received
-        OAuth.latch.countDown();
-        OAuth.authCode = code;
+        OAuth.countLatchDown();
+        OAuth.setAuthCode(code);
 
         // Sends a response back to the browser
         String response = "Authorization code received! You may close this page.";
