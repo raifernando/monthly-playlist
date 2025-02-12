@@ -13,10 +13,42 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * <p>
+ *     The {@link OAuth} class handles the process of the
+ *     <a href="https://developer.spotify.com/documentation/web-api/tutorials/code-flow">
+ *         Spotify OAuth Authorization Code Flow
+ *     </a>, which is used to manage Spotify resources on behalf of the user
+ *     and stores the API keys for future requests.
+ * </p>
+ * <p>
+ *     The process begins with a local server managed by {@link AuthCodeReceiver},
+ *     where the user is prompted to authenticate using their Spotify account.
+ *     This grants the application permission to access the resources specified in
+ *     the {@code scope} in {@link #spotifyLoginUrl()}.
+ * </p>
+ * <p>
+ *     Once the permission is granted, the local server receives the authorization code.
+ *     This code is then used to request an access token, which is required to make requests
+ *     in the Spotify API to manage the resources mentioned in the {@code scope}.
+ * </p>
+ * <p>
+ *     The access token is valid for one hour, after which it must be refreshed.
+ *     This class handles this automatically by storing the expiration date in
+ *     the {@link PropertiesFile}.
+ * </p>
+ * <p>
+ *     This class provides the following fields:
+ *     <ul>
+ *         <li>{@link #authCode}: the authorization code received from Spotify after user authentication.</li>
+ *         <li>{@link #latch}: a {@link CountDownLatch} used to wait for the authorization code to be received.</li>
+ *         <li>{@link #accessToken}: the access token used to make authenticated requests to the Spotify API.</li>
+ *     </ul>
+ * </p>
+ */
 public class OAuth {
     public static String authCode;
 
-    // Latch to wait for the retrieve of the authorization code in the AuthCodeReceiver class.
     public static CountDownLatch latch = new CountDownLatch(1);
 
     public static String accessToken;
@@ -26,7 +58,12 @@ public class OAuth {
     private static final PropertiesFile propertiesFile = new PropertiesFile();
 
     /**
-     * Get the access code for the authenticated user. The code is stored in this class field.
+     * <p>Retrieves the access token from the {@link PropertiesFile}.</p>
+     * <p>
+     *     If no token is stored, request a new one using the authorization code
+     *     received from the user's authentication.
+     * </p>
+     * <p>If the token is expired, a new access token is requested using the refresh token.</p>
      */
     public static void getAccessCode() {
         accessToken = propertiesFile.get("USER_ACCESS_CODE");
@@ -39,7 +76,8 @@ public class OAuth {
     }
 
     /**
-     * Request a new access token for the current user, using the authorization code.
+     * Requests a new access token for the current user, using the authorization code.
+     * The response also includes a refresh token, which is used in {@link #refreshAccessToken()}.
      */
     private static void requestAccessToken() {
         requestAuthorizationCode();
@@ -73,7 +111,10 @@ public class OAuth {
     }
 
     /**
-     * Create a local server to authenticate the user and get the authorization code.
+     * Using the {@link AuthCodeReceiver}, creates a local server used to retrieve
+     * the authorization code from the user's authentication process.
+     * <br>
+     * A latch is used to halt the application until the code is received.
      */
     private static void requestAuthorizationCode()  {
         try {
@@ -91,7 +132,7 @@ public class OAuth {
     }
 
     /**
-     * Send a request to refresh the stored access token.
+     * Sends a request to refresh the expired access token.
      */
     private static void refreshAccessToken() {
         System.out.println("Refreshing access token.");
@@ -139,6 +180,7 @@ public class OAuth {
     }
 
     /**
+     * Generates the URL for the user's authentication.
      * @return - the URL for authentication
      */
     private static String spotifyLoginUrl() {

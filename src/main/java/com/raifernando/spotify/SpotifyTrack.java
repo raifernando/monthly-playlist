@@ -12,6 +12,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/**
+ * The {@link SpotifyTrack} class handle the operation of searching for a track
+ * in Spotify.
+ */
 public class SpotifyTrack {
     private String id;
     private String name;

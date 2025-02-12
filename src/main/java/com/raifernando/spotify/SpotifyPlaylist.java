@@ -10,6 +10,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <p>
+ *     The {@link SpotifyPlaylist} class handles operations for a specified Spotify playlist.
+ *     The available operations include creating a new playlist and adding tracks to it.
+ * </p>
+ * <p>
+ *     This class is connected to {@link LastfmTrack}, which is used to retrieve the {@link SpotifyTrack} URI
+ *     that's required for adding a track to the playlist,
+ * </p>
+ */
 public class SpotifyPlaylist {
     private final String id;
 
