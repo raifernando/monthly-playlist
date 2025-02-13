@@ -30,6 +30,7 @@ public class Request {
 
             if (response.statusCode() != 200 && response.statusCode() != 201) {
                 System.out.println("------ Invalid API response with code " + response.statusCode() + ".");
+                System.out.println(response.body());
                 return null;
             }
 
