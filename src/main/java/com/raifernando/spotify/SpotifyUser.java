@@ -1,7 +1,6 @@
 package com.raifernando.spotify;
 
 import com.raifernando.util.Request;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * The {@link SpotifyUser} stores the ID information about a Spotify user.
@@ -17,9 +16,9 @@ public class SpotifyUser {
      *     The process of authentication in {@link OAuth} must be completed
      *     before this method is called.
      * </p>
-     * @return the current authenticated user as a {@link SpotifyUser}, or {@code null} if the request failed
+     * @return the current authenticated user as a {@link SpotifyUser}
+     * @throws NullPointerException if the request fails
      */
-    @Nullable
     public static SpotifyUser getCurrentUser() {
         System.out.println("Requesting current user's information.");
 
@@ -29,7 +28,7 @@ public class SpotifyUser {
                 SpotifyUser.class);
 
         if (response == null)
-            System.out.println("Failed to retrieve the current user information.");
+            throw new NullPointerException("Failed to retrieve the current user information.");
 
         return response;
     }
