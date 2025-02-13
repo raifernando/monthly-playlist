@@ -10,4 +10,4 @@ createfile:
 	@echo "API_KEY=\nCLIENT_ID=\nCLIENT_SECRET=\nLASTFM_USER=" >> $(API_KEYS_FILE)
 
 signout:
-	@java -cp target/monthly-playlist-1.0-SNAPSHOT-jar-with-dependencies.jar com.raifernando.spotify.SignOut
+	@java -cp target/monthly-playlist-v1.0-jar-with-dependencies.jar com.raifernando.spotify.SignOut
