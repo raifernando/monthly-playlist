@@ -7,6 +7,22 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 
+/**
+ * <p>
+ *     The {@link Credentials} class manages the API credentials required to make requests
+ *     to Spotify and Lastfm.
+ *     These credentials are retrieved from the {@link PropertiesFile}.
+ * </p>
+ * <p>
+ *     For this application, the Last.fm requests only require the {@link #lastfmApiKey}, while
+ *     Spotify requests require the {@link #spotifyAccessToken} which is obtained
+ *     by sending a request to Spotify using the {@link #spotifyClientId} and {@link #spotifyClientSecret}.
+ * </p>
+ * <p>
+ *     These credentials are essential for the correct use of the application.
+ *     If any credentials are missing, the program won't work as intended to.
+ * </p>
+ */
 public class Credentials {
     public static String spotifyClientId;
     public static String spotifyClientSecret;
@@ -14,9 +30,15 @@ public class Credentials {
 
     public static String lastfmApiKey;
 
+    // Single instance for getting and storing credentials.
     private static final PropertiesFile propertiesFile = new PropertiesFile();
 
-    public static void loadKeys() {
+    /**
+     * Loads credentials from the {@link PropertiesFile} and stores in the class fields.
+     * If no user is authenticated, a new authentication process starts with {@link OAuth}.
+     * @throws NullPointerException if any of the credentials are null
+     */
+    public static void loadKeys() throws NullPointerException {
         spotifyClientId = propertiesFile.get("CLIENT_ID");
         spotifyClientSecret = propertiesFile.get("CLIENT_SECRET");
         spotifyAccessToken = propertiesFile.get("ACCESS_TOKEN");
@@ -31,6 +53,9 @@ public class Credentials {
         OAuth.getAccessCode();
     }
 
+    /**
+     * Updates the fields related to the access token in the {@link PropertiesFile}.
+     */
     private static void saveAccessToken() {
         propertiesFile.store(Map.of(
                 "ACCESS_TOKEN", spotifyAccessToken,
@@ -38,6 +63,9 @@ public class Credentials {
         ));
     }
 
+    /**
+     * Requests a new access token.
+     */
     public static void getAccessToken() {
         System.out.println("Requested new access token.");
 

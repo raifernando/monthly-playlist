@@ -10,12 +10,15 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
 
+/**
+ * The {@link Request} class handles HTTP requests process.
+ */
 public class Request {
     private static final Gson gson = new Gson();
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     /**
-     * Sends a request and deserialize the response in a new instance of {@code tClass}.
+     * Sends a request and deserializes the response into a new instance of {@code tClass}.
      * @param httpRequest the HTTP Request already built
      * @param tClass the class for the deserialization
      * @return a new instance of {@code tClass} with the deserialized data, or {@code null} if the request fails
@@ -26,13 +29,13 @@ public class Request {
             HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200 && response.statusCode() != 201) {
-                System.out.println("------ Invalid API response.");
+                System.out.println("------ Invalid API response with code " + response.statusCode() + ".");
                 return null;
             }
 
             return gson.fromJson(response.body(), tClass);
         } catch (InterruptedException | IOException e) {
-            System.out.println("------ API send request failed.");
+            System.out.println("------ API send request failed: " + e.getMessage());
             return null;
         }
     }
@@ -56,7 +59,7 @@ public class Request {
     }
 
     /**
-     * Sends a GET request with no header.
+     * Sends a GET request without headers.
      * @param url the URL to send the request
      * @param tClass the class type used to deserialize the JSON response
      * @return returns a new instance of {@code tClass} class with the received data, or {@code null} if the request fails

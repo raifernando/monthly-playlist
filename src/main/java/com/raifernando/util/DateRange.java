@@ -5,15 +5,16 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 
+/**
+ * The {@link DateRange} class stores a date range in UNIX timestamps.
+ */
 public class DateRange {
     // Month range in UNIX timestamp
     private long startDate;
     private long endDate;
 
-    public DateRange() {}
-
     /**
-     * Set the month range from the list of arguments.
+     * Sets the month range based on the list of arguments.
      * @param args list of arguments
      * @throws DateTimeException if the date is invalid
      */
@@ -26,12 +27,12 @@ public class DateRange {
     }
 
     /**
-     * Set the start and end UNIX timestamps for the month range of the date provided in the list of arguments.
+     * Sets the start and end UNIX timestamps for the month range based on the date provided in the list of arguments.
      * @param args list of arguments
      * @throws Exception if the date is invalid
      */
     public void setDate(String [] args) throws Exception {
-        // If lastfm username was passed, the month and year get shifted one time to the right
+        // If last.fm username was passed, the month and year get shifted one time to the right
         int shift = args.length == 3 ? 1 : 0;
 
         startDate = getUnixTime(getMonthNumber(args[shift]), Integer.parseInt(args[1 + shift]));
@@ -41,6 +42,12 @@ public class DateRange {
             throw new DateTimeException("Invalid date");
     }
 
+    /**
+     * Retrieves the month number from a {@link String} containing the month name or abbreviation.
+     * @param month the month as a {@link String}
+     * @return an integer with the month number
+     * @throws ParseException if the month name is invalid
+     */
     private static int getMonthNumber(String month) throws ParseException {
         if (month.length() <= 2)
             return Integer.parseInt(month);
@@ -56,22 +63,39 @@ public class DateRange {
         return (cal.get(Calendar.MONTH) + 1);
     }
 
+    /**
+     * Retrieves the UNIX timestamp for the first day of the month and year.
+     * The time is from the start of the day, at the system's default timezone.
+     * @param month value of the month
+     * @param year value ogf the year
+     * @return a long with the unix timestamp
+     */
     private static long getUnixTime(int month, int year) {
         return LocalDate.of(year, month, 1).atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
     }
 
+    /**
+     * Adds one month to the provided UNIX timestamp.
+     * The time is from the start of the day, at the system's default timezone.
+     * @param time UNIX timestamp
+     * @return a long with the UNIX timestamp of the next month
+     */
     private static long addOneMonth(long time) {
         LocalDate date = LocalDate.ofEpochDay(time / 86400).plusMonths(1);
         return date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
     }
 
+    /**
+     * Returns a {@link String} in the format month:YYYY. The month is from the {@link #startDate}.
+     * @return the string
+     */
     public String getDateAsString() {
         return LocalDate.ofEpochDay(startDate / 86400).getMonth().toString().toLowerCase() + ":"
             + LocalDate.ofEpochDay(startDate / 86400).getYear();
     }
 
     /**
-     * Check whether the date is not in the future and is not before 1970.01.01 (start of the UNIX timestamp)
+     * Checks whether the date is not in the future and is not before 1970.01.01 (the start of the UNIX timestamp)
      * @param date date in unix timestamp
      * @return true if the date is valid; false if invalid
      */
@@ -82,14 +106,6 @@ public class DateRange {
                 .toLocalDate();
 
         return inputDate.isBefore(todaysDate) && (date > 0);
-    }
-
-    public long getStartDate() {
-        return startDate;
-    }
-
-    public long getEndDate() {
-        return endDate;
     }
 
     /**
@@ -112,5 +128,14 @@ public class DateRange {
         );
 
         return firstDay + ":" + lastDay;
+    }
+
+
+    public long getStartDate() {
+        return startDate;
+    }
+
+    public long getEndDate() {
+        return endDate;
     }
 }

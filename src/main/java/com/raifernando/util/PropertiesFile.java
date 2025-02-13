@@ -1,27 +1,27 @@
 package com.raifernando.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.*;
 import java.util.Map;
 import java.util.Properties;
 
 /**
- * Manage the {@code .properties} file with the necessary credentials for this app to work properly.
+ * Manages the {@code .properties} file containing the necessary credentials for this application to function properly.
  */
 public class PropertiesFile {
     private final Properties properties = new Properties();
     private final String filename;
 
     /**
-     * Create a new instance using the default file {@code (config.properties)}.
+     * Creates a new instance using the default filename {@code config.properties}.
      */
     public PropertiesFile() {
         this("config.properties"); // Default filename
     }
 
     /**
-     * Create new instance using a custom {@code .properties} file.
-     * If changed from the default file {@code (config.properties)},
-     * it is necessary to update the Makefile for this project to build correctly.
+     * Creates new instance using a custom {@code .properties} filename.
      * @param filename custom filename.
      */
     public PropertiesFile(String filename) {
@@ -30,7 +30,7 @@ public class PropertiesFile {
     }
 
     /**
-     * Load the content from the property file.
+     * Loads the content from the properties file.
      */
     private void loadProperties() {
         try (FileInputStream fileInput = new FileInputStream(filename)) {
@@ -43,17 +43,18 @@ public class PropertiesFile {
     }
 
     /**
-     * Get the property value from the key in the properties file.
+     * Retrieves the property value associated with the key in the properties file.
      * @param key key for the property
-     * @return the value, or null if not found
+     * @return the value, or {@code null} if not found
      */
+    @Nullable
     public String get(String key) {
         String property = properties.getProperty(key);
         return (property == null || property.isEmpty() ? null : property);
     }
 
     /**
-     * Store the value in the specified key
+     * Stores the value in the specified key
      * @param key key to store the value
      * @param value value to be stored
      */
@@ -62,7 +63,7 @@ public class PropertiesFile {
     }
 
     /**
-     * Store the values of the specified keys in the {@link Map}.
+     * Stores the values of the specified keys from the {@link Map}.
      * @param listOfProperties map with the list of key-values pairs.
      */
     public void store(Map<String, String> listOfProperties) {
